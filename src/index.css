@@ -59,6 +59,20 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+:focus-visible {
+  outline: 2px solid rgba(183, 121, 31, 0.62);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 244, 226, 0.95), 0 0 0 6px rgba(183, 121, 31, 0.34);
+  border-radius: 10px;
+}
+
 /* Prevent text selection on UI elements (keep it on prayer content) */
 .no-select {
   -webkit-user-select: none;
@@ -270,6 +284,12 @@ body {
 }
 .laudia-btn-ghost:hover { color: var(--laudia-text-soft); }
 
+.laudia-btn-ghost:focus-visible,
+.laudia-btn-secondary:focus-visible,
+.laudia-btn-primary:focus-visible {
+  transform: none;
+}
+
 .laudia-rank-chip {
   display: inline-flex;
   align-items: center;
@@ -397,6 +417,18 @@ html.dark .laudia-card {
 html.dark .laudia-btn-primary {
   background: linear-gradient(140deg, #f0e9df, #ddd1c2);
   color: var(--laudia-bg);
+}
+
+html.dark :focus-visible {
+  outline-color: rgba(230, 190, 124, 0.8);
+}
+
+html.dark button:focus-visible,
+html.dark a:focus-visible,
+html.dark input:focus-visible,
+html.dark select:focus-visible,
+html.dark textarea:focus-visible {
+  box-shadow: 0 0 0 3px rgba(32, 26, 24, 0.95), 0 0 0 6px rgba(230, 190, 124, 0.36);
 }
 
 html.dark .laudia-btn-secondary {

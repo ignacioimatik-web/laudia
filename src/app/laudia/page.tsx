@@ -47,7 +47,7 @@ export default function LaudiaPage() {
           </nav>
 
           {/* Mobile title */}
-          <span className="md:hidden text-xs text-stone-400 font-medium truncate max-w-[160px]">
+          <span className="md:hidden text-xs text-stone-500 font-medium truncate max-w-[160px]">
             {navItems.find(i => location.pathname.startsWith(i.to))?.label || ''}
           </span>
         </div>
@@ -72,12 +72,12 @@ export default function LaudiaPage() {
                   key={item.to}
                   to={item.to}
                   className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all touch-target
-                    ${isActive ? 'text-stone-800 bg-white/65 shadow-[0_6px_12px_rgba(0,0,0,0.08)]' : 'text-stone-400'}`}
+                    ${isActive ? 'text-stone-800 bg-white/65 shadow-[0_6px_12px_rgba(0,0,0,0.08)]' : 'text-stone-500'}`}
                 >
                   <svg className={`h-5 w-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive ? 2.5 : 1.8} d={item.icon} />
                   </svg>
-                  <span className={`text-[10px] font-medium leading-none ${isActive ? 'text-stone-800' : 'text-stone-400'}`}>
+                  <span className={`text-[10px] font-medium leading-none ${isActive ? 'text-stone-800' : 'text-stone-500'}`}>
                     {item.label}
                   </span>
                 </NavLink>

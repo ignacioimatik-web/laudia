@@ -65,7 +65,7 @@ export default function TodayPage() {
               type="checkbox"
               checked={showRubrics}
               onChange={(e) => setShowRubrics(e.target.checked)}
-              className="h-4 w-4 rounded border-stone-300 text-stone-700 focus:ring-0"
+              className="h-4 w-4 rounded border-stone-300 text-stone-700"
             />
             <span className="text-xs font-medium text-stone-600">Rúbricas</span>
           </label>
@@ -150,7 +150,7 @@ export default function TodayPage() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-xs text-stone-400">
+        <div className="mt-8 text-center text-xs text-stone-500">
           <p>A+ / A− para cambiar tamaño · Ocultar rúbricas en modo lectura</p>
         </div>
       </div>

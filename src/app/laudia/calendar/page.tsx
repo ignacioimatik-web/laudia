@@ -153,7 +153,7 @@ export default function CalendarPage() {
 
               <div className="flex items-center gap-3">
                 <h1 className="laudia-h1">
-                  {MONTHS[displayMonth]} <span className="font-normal text-stone-400">{displayYear}</span>
+                  {MONTHS[displayMonth]} <span className="font-normal text-stone-500">{displayYear}</span>
                 </h1>
                 <button
                   onClick={goToday}
@@ -178,7 +178,7 @@ export default function CalendarPage() {
             {/* Weekday headers */}
             <div className="grid grid-cols-7 mb-3">
               {WEEKDAYS.map(wd => (
-                <div key={wd} className="text-center text-xs font-medium text-stone-400 uppercase tracking-wider py-1">
+                <div key={wd} className="text-center text-xs font-medium text-stone-500 uppercase tracking-wider py-1">
                   {wd}
                 </div>
               ))}
@@ -235,7 +235,7 @@ export default function CalendarPage() {
                     <div className="mt-auto flex items-center gap-1.5">
                       <LiturgicalBadge color={badgeColor} glow={isSolemnity} size="sm" />
                         {(d.rank !== 'FERIA' || isSunday) && (
-                          <span className="hidden md:inline text-[10px] text-stone-400 leading-tight truncate max-w-[4rem]">
+                          <span className="hidden md:inline text-[10px] text-stone-500 leading-tight truncate max-w-[4rem]">
                             {isSunday ? 'Domingo' : rankLabels[d.rank]?.substring(0, 6)}
                           </span>
                         )}
@@ -252,7 +252,7 @@ export default function CalendarPage() {
             </div>
 
             {/* Legend */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 text-xs text-stone-500">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 text-xs text-stone-600">
               {(['SOLEMNIDAD', 'FIESTA', 'MEMORIA_OBLIGATORIA', 'FERIA'] as LiturgicalRank[]).map(rank => (
                 <span key={rank} className="flex items-center gap-1.5 rounded-full border border-stone-200/70 bg-white/55 px-2.5 py-1">
                   <LiturgicalBadge
@@ -347,7 +347,7 @@ export default function CalendarPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-stone-400 text-center py-12 text-sm">
+                <p className="text-stone-500 text-center py-12 text-sm">
                   Selecciona un día para ver su información litúrgica
                 </p>
               )}
