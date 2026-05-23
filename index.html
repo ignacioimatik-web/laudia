@@ -2,9 +2,28 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LaudIA</title>
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- PWA iOS standalone mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="LaudIA" />
+
+    <!-- PWA Android -->
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#f5f0eb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1c1917" media="(prefers-color-scheme: dark)" />
+
+    <!-- Viewport: responsive + no pinch-zoom lock for accessibility -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <meta name="description" content="Reza los Laudes de la Liturgia de las Horas con belleza, claridad y fidelidad litúrgica." />
+
+    <title>LaudIA — Laudes de la mañana</title>
   </head>
   <body>
     <div id="root"></div>
