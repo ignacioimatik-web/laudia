@@ -1,5 +1,5 @@
 import { buildLaudsOffice } from '@/lib/laudia/prayer-builder';
-import { LaudsOffice, PrayerSection } from '@/types/laudia';
+import { LaudsOffice, PrayerBlock, PrayerSection } from '@/types/laudia';
 
 const MONTH_SEGMENTS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -45,6 +45,88 @@ function extractSection(source: string, start: RegExp, end?: RegExp): string | n
   return rest.slice(0, endMatch.index).trim();
 }
 
+function parsePsalmNumber(header: string): number | null {
+  const match = header.match(/Salmo\s+(\d{1,3})/i);
+  return match ? Number(match[1]) : null;
+}
+
+function parsePsalmodyBlocks(psalmody: string): PrayerBlock[] {
+  const blocks: PrayerBlock[] = [];
+  const antiphonMatches = [...psalmody.matchAll(/Ant\s*\d?\.\s*([^\n]+)/gi)];
+  const antiphons = antiphonMatches.map((match) => match[1].trim()).filter(Boolean);
+
+  const headingRegex = /(Salmo\s+\d{1,3}[^\n]*|C[aá]ntico:[^\n]*)/gi;
+  const headingMatches = [...psalmody.matchAll(headingRegex)];
+
+  let antiphonIndex = 0;
+  headingMatches.forEach((match, index) => {
+    const heading = match[1].trim();
+    const start = match.index ?? 0;
+    const end = index + 1 < headingMatches.length
+      ? (headingMatches[index + 1].index ?? psalmody.length)
+      : psalmody.length;
+    const chunk = psalmody.slice(start, end).trim();
+
+    const antiphonText = antiphons[antiphonIndex] ?? null;
+    if (antiphonText) {
+      blocks.push({
+        id: `psalmody-antiphon-${antiphonIndex + 1}`,
+        type: 'ANTIPHON',
+        officialText: antiphonText,
+        verificationStatus: 'PENDING',
+        source: 'LITURGIA_HORAS_OFICIAL',
+        aiReflection: null,
+        psalmInfo: null,
+        canticleInfo: null,
+      });
+      antiphonIndex += 1;
+    }
+
+    if (/^Salmo\s+/i.test(heading)) {
+      blocks.push({
+        id: `psalmody-psalm-${index + 1}`,
+        type: 'PSALM',
+        officialText: chunk,
+        verificationStatus: 'PENDING',
+        source: 'SALTERIO_OFICIAL',
+        aiReflection: null,
+        psalmInfo: {
+          number: parsePsalmNumber(heading) ?? 1,
+        },
+        canticleInfo: null,
+      });
+    } else {
+      blocks.push({
+        id: `psalmody-canticle-${index + 1}`,
+        type: 'CANTICLE_OT',
+        officialText: chunk,
+        verificationStatus: 'PENDING',
+        source: 'LITURGIA_HORAS_OFICIAL',
+        aiReflection: null,
+        psalmInfo: null,
+        canticleInfo: {
+          name: heading.replace(/^C[aá]ntico:\s*/i, '').trim(),
+        },
+      });
+    }
+  });
+
+  if (blocks.length === 0) {
+    blocks.push({
+      id: 'psalmody-text',
+      type: 'PSALM',
+      officialText: psalmody,
+      verificationStatus: 'PENDING',
+      source: 'SALTERIO_OFICIAL',
+      aiReflection: null,
+      psalmInfo: null,
+      canticleInfo: null,
+    });
+  }
+
+  return blocks;
+}
+
 function buildSectionsFromText(text: string): PrayerSection[] | null {
   const bodyStart = text.search(/\bLAUDES\b/i);
   const body = bodyStart >= 0 ? text.slice(bodyStart) : text;
@@ -67,7 +149,7 @@ function buildSectionsFromText(text: string): PrayerSection[] | null {
   return [
     { id: 'opening', title: 'Inicio', blocks: [{ id: 'opening-text', type: 'INVITATORY', officialText: opening, verificationStatus: 'PENDING', source: 'LITURGIA_HORAS_OFICIAL', aiReflection: null, psalmInfo: null, canticleInfo: null }] },
     { id: 'hymn', title: 'Himno', blocks: [{ id: 'hymn-text', type: 'HYMN', officialText: hymn, verificationStatus: 'PENDING', source: 'LITURGIA_HORAS_OFICIAL', aiReflection: null, psalmInfo: null, canticleInfo: null }] },
-    { id: 'psalmody', title: 'Salmodia', blocks: [{ id: 'psalmody-text', type: 'PSALM', officialText: psalmody, verificationStatus: 'PENDING', source: 'SALTERIO_OFICIAL', aiReflection: null, psalmInfo: null, canticleInfo: null }] },
+    { id: 'psalmody', title: 'Salmodia', blocks: parsePsalmodyBlocks(psalmody) },
     { id: 'reading', title: 'Lectura breve', blocks: [{ id: 'reading-text', type: 'READING', officialText: reading, verificationStatus: 'PENDING', source: 'LITURGIA_HORAS_OFICIAL', aiReflection: null, psalmInfo: null, canticleInfo: null }] },
     { id: 'responsory', title: 'Responsorio breve', blocks: [{ id: 'responsory-text', type: 'RESPONSORY', officialText: responsory, verificationStatus: 'PENDING', source: 'LITURGIA_HORAS_OFICIAL', aiReflection: null, psalmInfo: null, canticleInfo: null }] },
     { id: 'benedictus', title: 'Benedictus', blocks: [{ id: 'benedictus-text', type: 'CANTICLE_GOSPEL', officialText: benedictus, verificationStatus: 'PENDING', source: 'LITURGIA_HORAS_OFICIAL', aiReflection: null, psalmInfo: null, canticleInfo: { name: 'Benedictus' } }] },
