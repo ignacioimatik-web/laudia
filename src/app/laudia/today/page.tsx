@@ -97,11 +97,11 @@ export default function TodayPage() {
               style={si > 0 ? { animationDelay: `${si * 60}ms` } : undefined}
             >
               <h2 className="laudia-h2 mb-4">{section.title}</h2>
-              <div className="space-y-5">
+              <div className="laudia-flow">
                 {section.blocks.map((block: PrayerBlock, bi: number) => (
                   <div
                     key={block.id}
-                    className={bi > 0 ? 'pt-5 border-t border-stone-200/50' : ''}
+                    className={`laudia-block ${bi > 0 ? '' : ''}`}
                   >
                     {/* Rubric */}
                     {effectiveShowRubrics && block.rubrics && (
@@ -132,7 +132,7 @@ export default function TodayPage() {
                     )}
 
                     {/* Official text */}
-                    <p className={`whitespace-pre-line leading-relaxed text-stone-800 ${block.type === 'ANTIPHON' ? 'italic text-stone-600 border-l-2 border-amber-300/70 pl-3' : ''}`}>
+                    <p className={`whitespace-pre-line leading-relaxed text-stone-800 ${block.type === 'ANTIPHON' ? 'laudia-block-quiet italic border-l-2 border-amber-300/70 pl-3' : ''}`}>
                       {block.officialText}
                     </p>
 

@@ -5,15 +5,15 @@ type ReadingModeToggleProps = {
 
 export default function ReadingModeToggle({ readingMode, onToggle }: ReadingModeToggleProps) {
   return (
-    <div className="flex items-center gap-2 text-sm text-amber-800">
-      <label className="flex items-center gap-1 cursor-pointer">
+    <div className="laudia-control-pill text-sm text-stone-700 px-3">
+      <label className="flex items-center gap-2 cursor-pointer">
         <input
           type="checkbox"
           checked={readingMode}
           onChange={onToggle}
-          className="h-4 w-4 text-amber-600"
+          className="h-4 w-4 rounded border-stone-300 text-stone-700"
         />
-        <span>Modo lectura</span>
+        <span className="text-xs font-medium">Modo lectura</span>
       </label>
     </div>
   );

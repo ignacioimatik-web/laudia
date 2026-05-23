@@ -159,6 +159,14 @@ body {
   letter-spacing: 0.003em;
 }
 
+.laudia-prose p {
+  margin: 0;
+}
+
+.laudia-flow > * + * {
+  margin-top: 1.15rem;
+}
+
 .laudia-prayer .antiphon {
   font-style: italic;
   color: var(--laudia-text-soft);
@@ -187,6 +195,20 @@ body {
   background: rgba(255, 255, 255, 0.58);
   border-radius: 999px;
   padding: 0.18rem 0.56rem;
+}
+
+.laudia-block {
+  position: relative;
+}
+
+.laudia-block + .laudia-block {
+  padding-top: 1.3rem;
+  border-top: 1px solid rgba(148, 136, 130, 0.25);
+}
+
+.laudia-block-quiet {
+  color: var(--laudia-text-soft);
+  font-size: 0.98em;
 }
 
 /* ── Buttons ──────────────────────────────────────────────────────────── */
@@ -267,6 +289,15 @@ body {
 .laudia-rank-feria { background: #f4f3f1; color: #6a615d; border-color: #dfdbd7; }
 .laudia-rank-domingo { background: #fff6da; color: #986616; border-color: #e9d39d; }
 
+.laudia-control-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--laudia-border-light);
+  background: rgba(255, 255, 255, 0.56);
+  padding: 0.25rem;
+}
+
 /* ── Transitions ──────────────────────────────────────────────────────── */
 
 @keyframes fade-in {
@@ -313,6 +344,11 @@ body {
   max-width: 44rem;
   margin-left: auto;
   margin-right: auto;
+}
+
+.reading-mode .laudia-h2 {
+  text-align: center;
+  margin-bottom: 1.2rem;
 }
 
 .reading-mode .laudia-card,
