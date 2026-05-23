@@ -1,10 +1,33 @@
 import { LiturgicalDay } from '@/types/laudia';
+import LiturgicalBadge from './LiturgicalBadge';
 
 type TodayHeaderProps = {
   office: {
     day: LiturgicalDay;
     isFullyVerified: boolean;
   };
+};
+
+const seasonLabels: Record<string, string> = {
+  ADVENTO: 'Adviento',
+  NAVIDAD: 'Navidad',
+  TIEMPO_ORDINARIO_1: 'Tiempo Ordinario',
+  CUARESMA: 'Cuaresma',
+  TRIDUO_PASCUAL: 'Triduo Pascual',
+  PASCUA: 'Pascua',
+  TIEMPO_ORDINARIO_2: 'Tiempo Ordinario',
+};
+
+const colorLabels: Record<string, string> = {
+  WHITE: 'Blanco', RED: 'Rojo', GREEN: 'Verde',
+  VIOLET: 'Violeta', BLACK: 'Negro', ROSE: 'Rosa',
+};
+
+const rankLabels: Record<string, string> = {
+  SOLEMNIDAD: 'Solemnidad',
+  FIESTA: 'Fiesta',
+  MEMORIA_OBLIGATORIA: 'Memoria',
+  FERIA: 'Feria',
 };
 
 export default function TodayHeader({ office }: TodayHeaderProps) {
@@ -17,60 +40,67 @@ export default function TodayHeader({ office }: TodayHeaderProps) {
     day: 'numeric',
   });
 
-  // Map liturgical color to tailwind color class (text- and bg-)
-  const colorMap: Record<string, { bg: string; text: string }> = {
-    WHITE: { bg: 'bg-white/20', text: 'text-white' },
-    RED: { bg: 'bg-red-500/20', text: 'text-red-500' },
-    GREEN: { bg: 'bg-green-500/20', text: 'text-green-500' },
-    VIOLET: { bg: 'bg-violet-500/20', text: 'text-violet-500' },
-    BLACK: { bg: 'bg-black/20', text: 'text-black' },
-    ROSE: { bg: 'bg-rose-500/20', text: 'text-rose-500' },
-    BLUE: { bg: 'bg-blue-500/20', text: 'text-blue-500' },
-  };
-
-  const colorInfo = colorMap[day.color] || { bg: 'bg-gray-500/20', text: 'text-gray-500' };
+  const dotColor = day.color.toLowerCase() as LiturgicalBadgeProps['color'];
+  const hasRank = day.rank in rankLabels;
 
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8 border border-white/20">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <p className="text-sm text-white/70">Fecha</p>
-          <p className="text-xl font-semibold text-white">{formattedDate}</p>
+    <div className="laudia-card">
+      {/* Top accent line */}
+      <div className="h-1 rounded-t-[12px]" style={{
+        background: day.color === 'WHITE' ? 'linear-gradient(90deg, #e7e5e4, #fafafa, #e7e5e4)'
+          : day.color === 'RED' ? 'linear-gradient(90deg, #fca5a5, #ef4444, #fca5a5)'
+          : day.color === 'GREEN' ? 'linear-gradient(90deg, #86efac, #22c55e, #86efac)'
+          : day.color === 'VIOLET' ? 'linear-gradient(90deg, #c4b5fd, #8b5cf6, #c4b5fd)'
+          : day.color === 'BLACK' ? 'linear-gradient(90deg, #57534e, #292524, #57534e)'
+          : 'linear-gradient(90deg, #fda4af, #f43f5e, #fda4af)'
+      }} />
+
+      <div className="p-5 md:p-6">
+        {/* Top row: date + verification */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <time className="laudia-h3">{formattedDate}</time>
+          <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${
+            isFullyVerified
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-amber-50 text-amber-700 border border-amber-200'
+          }`}>
+            {isFullyVerified ? '✓ Textos verificados' : 'Pendiente de verificación'}
+          </span>
         </div>
-        <div className="space-y-2">
-          <p className="text-sm text-white/70">Celebración</p>
-          <p className="text-lg font-semibold text-white">{day.title}</p>
-        </div>
-        <div className="space-y-2">
-          <p className="text-sm text-white/70">Tiempo litúrgico</p>
-          <p className="text-lg font-semibold text-white">
-            {day.season.replace(/_/g, ' ').toLowerCase()}
-          </p>
-        </div>
-        <div className="space-y-2">
-          <p className="text-sm text-white/70">Semana del Salterio</p>
-          <p className="text-lg font-semibold text-white">
-            Semana {day.psalterWeek}
-          </p>
-        </div>
-        <div className="space-y-2">
-          <p className="text-sm text-white/70">Color litúrgico</p>
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full ${colorInfo.bg}"></div>
-            <span className="text-white font-medium">{day.color}</span>
-          </div>
-        </div>
-        <div className="space-y-2 md:col-span-2">
-          <p className="text-sm text-white/70">Estado de verificación</p>
-          <p className="text-lg font-semibold">
-            {isFullyVerified ? (
-              <span className="text-green-400">Textos oficiales verificados</span>
-            ) : (
-              <span className="text-yellow-400">
-                Algunos textos son placeholders pendientes de verificación oficial
+
+        {/* Main info grid */}
+        <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          {/* Celebration */}
+          <div>
+            <p className="laudia-h3 mb-1">Celebración</p>
+            <div className="flex items-start gap-2">
+              <span className="laudia-h1 leading-tight">{day.title}</span>
+            </div>
+            {hasRank && (
+              <span className="inline-block mt-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">
+                {rankLabels[day.rank]}
               </span>
             )}
-          </p>
+          </div>
+
+          {/* Metadata column */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="laudia-h3">Tiempo</span>
+              <span className="text-sm text-stone-700">{seasonLabels[day.season] || day.season.replace(/_/g, ' ')}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="laudia-h3">Salterio</span>
+              <span className="text-sm text-stone-700">Semana {day.psalterWeek}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="laudia-h3">Color</span>
+              <div className="flex items-center gap-2">
+                <LiturgicalBadge color={dotColor} glow size="sm" />
+                <span className="text-sm text-stone-700">{colorLabels[day.color] || day.color}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

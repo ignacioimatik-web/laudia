@@ -1,24 +1,22 @@
 export default function CalendarPreview() {
   return (
-    <div className="bg-white rounded-xl shadow-md p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Calendario litúrgico</h2>
+    <div className="laudia-card p-5 animate-fade-in">
+      <h2 className="laudia-h2 mb-4">Calendario</h2>
       <div className="space-y-3">
-        <div className="flex justify-between text-sm">
-          <span>Hoy:</span>
-          <span className="text-gray-600">Solemnidad de María, Madre de Dios</span>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-stone-500">Hoy</span>
+          <span className="text-stone-700 font-medium">Solemnidad de María, Madre de Dios</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span>Mañana:</span>
-          <span className="text-gray-600">San Basilio el Grande y San Gregorio Nacianceno</span>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-stone-500">Mañana</span>
+          <span className="text-stone-700">San Basilio y San Gregorio</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span>Pasado mañana:</span>
-          <span className="text-gray-600">Santísimo Nombre de Jesús</span>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-stone-500">Pasado</span>
+          <span className="text-stone-700">Santísimo Nombre de Jesús</span>
         </div>
       </div>
-      <button 
-        className="w-full mt-4 border border-gray-300 bg-white py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors text-sm text-gray-700"
-      >
+      <button className="laudia-btn-ghost mt-4 w-full justify-center">
         Ver calendario completo
       </button>
     </div>
