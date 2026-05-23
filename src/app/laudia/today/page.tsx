@@ -1,6 +1,6 @@
 import TodayHeader from '@/components/laudia/TodayHeader';
 import { LaudsOffice, PrayerSection, PrayerBlock } from '@/types/laudia';
-import { buildLaudsOffice } from '@/lib/laudia/prayer-builder';
+import { buildLaudsOfficeFromOfficialSource } from '@/lib/laudia/official-source';
 import { VerificationNotice } from '@/components/laudia/VerificationNotice';
 import FontSizeControls from '@/components/laudia/FontSizeControls';
 import ReadingModeToggle from '@/components/laudia/ReadingModeToggle';
@@ -16,8 +16,18 @@ export default function TodayPage() {
   const [readingMode, setReadingMode] = useState<boolean>(false);
 
   useEffect(() => {
-    const built = buildLaudsOffice(today);
-    setOffice(built);
+    let cancelled = false;
+
+    (async () => {
+      const built = await buildLaudsOfficeFromOfficialSource(today);
+      if (!cancelled) {
+        setOffice(built);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [today]);
 
   const validation = useMemo(() => office ? validateOffice(office) : null, [office]);
