@@ -20,11 +20,11 @@ const rankLabels: Record<LiturgicalRank, string> = {
 };
 
 const rankStyle: Record<LiturgicalRank, string> = {
-  SOLEMNIDAD:          'bg-stone-800 text-white',
-  FIESTA:              'bg-rose-50 text-rose-700',
-  MEMORIA_OBLIGATORIA: 'bg-violet-50 text-violet-700',
-  MEMORIA_OPcional:    'bg-violet-50/50 text-violet-600',
-  FERIA:               'bg-stone-100 text-stone-600',
+  SOLEMNIDAD:          'laudia-rank-chip laudia-rank-solemnidad',
+  FIESTA:              'laudia-rank-chip laudia-rank-fiesta',
+  MEMORIA_OBLIGATORIA: 'laudia-rank-chip laudia-rank-memoria',
+  MEMORIA_OPcional:    'laudia-rank-chip laudia-rank-memoria',
+  FERIA:               'laudia-rank-chip laudia-rank-feria',
 };
 
 const MONTHS = [
@@ -140,10 +140,10 @@ export default function CalendarPage() {
           {/* ══ Calendar =============================================== */}
           <div className="lg:w-3/5">
             {/* Month navigation */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-5">
               <button
                 onClick={goPrevMonth}
-                className="p-2 rounded-xl hover:bg-white/60 transition-colors text-stone-500"
+                className="laudia-btn-secondary !px-2.5 !py-2 text-stone-500"
                 aria-label="Mes anterior"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +166,7 @@ export default function CalendarPage() {
               <button
                 onClick={goNextMonth}
                 disabled={displayYear >= 2030 && displayMonth >= 11}
-                className="p-2 rounded-xl hover:bg-white/60 transition-colors text-stone-500 disabled:opacity-30"
+                className="laudia-btn-secondary !px-2.5 !py-2 text-stone-500 disabled:opacity-30"
                 aria-label="Mes siguiente"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,6 +185,7 @@ export default function CalendarPage() {
             </div>
 
             {/* Grid */}
+            <div className="laudia-card p-2 md:p-3">
             <div className="grid grid-cols-7 gap-1.5">
               {gridCells.map((cell, idx) => {
                 if (cell.type === 'empty') {
@@ -196,6 +197,15 @@ export default function CalendarPage() {
                 const isT = isToday(d.date);
                 const badgeColor = colorMap[d.color] || 'white';
                 const isSolemnity = d.rank === 'SOLEMNIDAD';
+                const dayDate = new Date(d.date + 'T00:00:00');
+                const isSunday = dayDate.getDay() === 0;
+                const rankState = d.rank === 'SOLEMNIDAD'
+                  ? 'ring-1 ring-stone-300/60'
+                  : d.rank === 'FIESTA'
+                    ? 'ring-1 ring-rose-200/80'
+                    : d.rank === 'FERIA'
+                      ? 'ring-1 ring-stone-200/70'
+                      : 'ring-1 ring-violet-200/75';
 
                 return (
                   <button
@@ -204,12 +214,13 @@ export default function CalendarPage() {
                     className={`
                       relative flex flex-col items-start justify-start
                       p-2 md:p-3 min-h-[3rem] md:min-h-[4.25rem] w-full
-                      rounded-xl transition-all duration-150 text-left
+                      rounded-xl transition-all duration-200 text-left
                       ${isSel
                         ? 'bg-amber-50 ring-2 ring-amber-400/60 shadow-sm'
-                        : 'bg-white/70 hover:bg-white border border-stone-200/60'
+                        : `bg-white/70 hover:bg-white border border-stone-200/60 ${rankState}`
                       }
                       ${isSolemnity ? 'font-semibold' : ''}
+                      ${isSunday ? 'bg-amber-50/60' : ''}
                     `}
                   >
                     {/* Day number */}
@@ -223,11 +234,11 @@ export default function CalendarPage() {
                     {/* Color dot + rank label */}
                     <div className="mt-auto flex items-center gap-1.5">
                       <LiturgicalBadge color={badgeColor} glow={isSolemnity} size="sm" />
-                      {d.rank !== 'FERIA' && (
-                        <span className="hidden md:inline text-[10px] text-stone-400 leading-tight truncate max-w-[4rem]">
-                          {rankLabels[d.rank]?.substring(0, 6)}
-                        </span>
-                      )}
+                        {(d.rank !== 'FERIA' || isSunday) && (
+                          <span className="hidden md:inline text-[10px] text-stone-400 leading-tight truncate max-w-[4rem]">
+                            {isSunday ? 'Domingo' : rankLabels[d.rank]?.substring(0, 6)}
+                          </span>
+                        )}
                     </div>
 
                     {/* Today indicator */}
@@ -238,11 +249,12 @@ export default function CalendarPage() {
                 );
               })}
             </div>
+            </div>
 
             {/* Legend */}
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-5 text-xs text-stone-500">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 text-xs text-stone-500">
               {(['SOLEMNIDAD', 'FIESTA', 'MEMORIA_OBLIGATORIA', 'FERIA'] as LiturgicalRank[]).map(rank => (
-                <span key={rank} className="flex items-center gap-1.5">
+                <span key={rank} className="flex items-center gap-1.5 rounded-full border border-stone-200/70 bg-white/55 px-2.5 py-1">
                   <LiturgicalBadge
                     color={
                       rank === 'SOLEMNIDAD' ? 'white' :
@@ -255,6 +267,9 @@ export default function CalendarPage() {
                   {rankLabels[rank]}
                 </span>
               ))}
+              <span className="flex items-center gap-1.5 rounded-full border border-stone-200/70 bg-white/55 px-2.5 py-1">
+                <LiturgicalBadge color="blue" size="sm" /> Domingo
+              </span>
             </div>
           </div>
 
@@ -283,7 +298,7 @@ export default function CalendarPage() {
                   <div className="space-y-2">
                     <p className="laudia-h3">Celebración</p>
                     <p className="text-base font-medium text-stone-800">{selectedDayLiturgical.title}</p>
-                    <span className={`inline-block text-xs font-medium px-3 py-1 rounded-full ${rankStyle[selectedDayLiturgical.rank]}`}>
+                    <span className={rankStyle[selectedDayLiturgical.rank]}>
                       {rankLabels[selectedDayLiturgical.rank]}
                     </span>
                   </div>

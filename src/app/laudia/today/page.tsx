@@ -54,20 +54,20 @@ export default function TodayPage() {
         <TodayHeader office={office} />
 
         {/* Controls bar */}
-        <div className="flex flex-wrap items-center gap-4 mt-5 mb-6 px-1">
+        <div className="laudia-card mt-4 mb-6 p-3.5 md:p-4 flex flex-wrap items-center gap-3">
           <FontSizeControls
             fontSize={fontSize}
             onIncrease={increaseFontSize}
             onDecrease={decreaseFontSize}
           />
-          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+          <label className="flex items-center gap-2 cursor-pointer select-none rounded-full border border-stone-200/70 bg-white/55 px-3 py-1.5">
             <input
               type="checkbox"
               checked={showRubrics}
               onChange={(e) => setShowRubrics(e.target.checked)}
               className="h-4 w-4 rounded border-stone-300 text-stone-700 focus:ring-0"
             />
-            <span className="text-sm text-stone-500">Rúbricas</span>
+            <span className="text-xs font-medium text-stone-600">Rúbricas</span>
           </label>
           <ReadingModeToggle
             readingMode={readingMode}
@@ -86,7 +86,7 @@ export default function TodayPage() {
 
         {/* Prayer sections */}
         <div
-          className={`laudia-prayer space-y-6 ${
+          className={`laudia-prayer laudia-prose space-y-6 ${
             fontSize <= 14 ? 'text-sm' : fontSize <= 18 ? 'text-base' : fontSize <= 22 ? 'text-lg' : 'text-xl'
           } ${readingMode ? 'reading-mode' : ''}`}
         >
@@ -101,16 +101,17 @@ export default function TodayPage() {
                 {section.blocks.map((block: PrayerBlock, bi: number) => (
                   <div
                     key={block.id}
-                    className={bi > 0 ? 'pt-5 border-t border-stone-100' : ''}
+                    className={bi > 0 ? 'pt-5 border-t border-stone-200/50' : ''}
                   >
                     {/* Rubric */}
                     {effectiveShowRubrics && block.rubrics && (
-                      <p className="rubric mb-2">{block.rubrics}</p>
+                      <p className="rubric mb-2"><span className="laudia-rubric-chip">{block.rubrics}</span></p>
                     )}
 
                     {/* Block label */}
                     {block.type !== 'TEXT' && (
-                      <p className="text-[11px] font-medium text-stone-400 uppercase tracking-wider mb-1.5">
+                      <p className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mb-2">
+                        <span className="laudia-block-label">
                         {block.type === 'ANTIPHON' && 'Antífona'}
                         {block.type === 'PSALM' && (block.psalmInfo
                           ? `Salmo ${block.psalmInfo.number}${block.psalmInfo.verses ? ` (${block.psalmInfo.verses})` : ''}`
@@ -126,11 +127,12 @@ export default function TodayPage() {
                         {block.type === 'OUR_FATHER' && 'Oración del Señor'}
                         {block.type === 'CONCLUDING_PRAYER' && 'Oración final'}
                         {block.type === 'CONCLUSION' && 'Conclusión'}
+                        </span>
                       </p>
                     )}
 
                     {/* Official text */}
-                    <p className="whitespace-pre-line leading-relaxed text-stone-800">
+                    <p className={`whitespace-pre-line leading-relaxed text-stone-800 ${block.type === 'ANTIPHON' ? 'italic text-stone-600 border-l-2 border-amber-300/70 pl-3' : ''}`}>
                       {block.officialText}
                     </p>
 

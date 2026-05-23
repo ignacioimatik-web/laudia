@@ -15,7 +15,7 @@ export default function LaudiaPage() {
   return (
     <div className="min-h-screen laudia-gradient flex flex-col" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {/* ═══ Top bar ═══════════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-lg border-b border-stone-200/60 safe-top no-select">
+      <header className="sticky top-0 z-30 bg-white/62 backdrop-blur-xl border-b border-stone-200/45 safe-top no-select">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-12 md:h-14">
           <NavLink to="/laudia" end className="flex items-center gap-2 text-stone-700 font-medium shrink-0">
             <svg className="h-5 w-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,10 +31,10 @@ export default function LaudiaPage() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap touch-target
+                  `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap touch-target
                   ${isActive
-                    ? 'bg-stone-800 text-white shadow-sm'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100'
+                    ? 'bg-stone-800 text-white shadow-[0_8px_14px_rgba(45,36,30,0.2)]'
+                    : 'text-stone-500 hover:text-stone-700 hover:bg-white/70'
                   }`
                 }
               >
@@ -61,7 +61,7 @@ export default function LaudiaPage() {
       {/* ═══ Bottom navigation (mobile) ══════════════════════════════════ */}
       {!isPrayRoute && (
         <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-xl border-t border-stone-200/60 no-select"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/74 backdrop-blur-xl border-t border-stone-200/60 no-select"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
           <div className="flex items-center justify-around h-14 px-2">
@@ -71,8 +71,8 @@ export default function LaudiaPage() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-lg transition-all touch-target
-                    ${isActive ? 'text-stone-800' : 'text-stone-400'}`}
+                  className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition-all touch-target
+                    ${isActive ? 'text-stone-800 bg-white/65 shadow-[0_6px_12px_rgba(0,0,0,0.08)]' : 'text-stone-400'}`}
                 >
                   <svg className={`h-5 w-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive ? 2.5 : 1.8} d={item.icon} />

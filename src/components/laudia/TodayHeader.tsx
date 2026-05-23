@@ -42,9 +42,17 @@ export default function TodayHeader({ office }: TodayHeaderProps) {
 
   const dotColor = day.color.toLowerCase() as LiturgicalBadgeProps['color'];
   const hasRank = day.rank in rankLabels;
+  const isSunday = date.getDay() === 0;
+  const rankClass = day.rank === 'SOLEMNIDAD'
+    ? 'laudia-rank-solemnidad'
+    : day.rank === 'FIESTA'
+      ? 'laudia-rank-fiesta'
+      : day.rank === 'FERIA'
+        ? 'laudia-rank-feria'
+        : 'laudia-rank-memoria';
 
   return (
-    <div className="laudia-card">
+    <div className="laudia-card overflow-hidden">
       {/* Top accent line */}
       <div className="h-1 rounded-t-[12px]" style={{
         background: day.color === 'WHITE' ? 'linear-gradient(90deg, #e7e5e4, #fafafa, #e7e5e4)'
@@ -59,9 +67,9 @@ export default function TodayHeader({ office }: TodayHeaderProps) {
         {/* Top row: date + verification */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <time className="laudia-h3">{formattedDate}</time>
-          <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${
+          <span className={`laudia-rank-chip ${
             isFullyVerified
-              ? 'bg-green-50 text-green-700 border border-green-200'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
               : 'bg-amber-50 text-amber-700 border border-amber-200'
           }`}>
             {isFullyVerified ? '✓ Textos verificados' : 'Pendiente de verificación'}
@@ -76,20 +84,19 @@ export default function TodayHeader({ office }: TodayHeaderProps) {
             <div className="flex items-start gap-2">
               <span className="laudia-h1 leading-tight">{day.title}</span>
             </div>
-            {hasRank && (
-              <span className="inline-block mt-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">
-                {rankLabels[day.rank]}
-              </span>
-            )}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {hasRank && <span className={`laudia-rank-chip ${rankClass}`}>{rankLabels[day.rank]}</span>}
+              {isSunday && <span className="laudia-rank-chip laudia-rank-domingo">Domingo</span>}
+            </div>
           </div>
 
           {/* Metadata column */}
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pb-2 border-b border-stone-200/50">
               <span className="laudia-h3">Tiempo</span>
               <span className="text-sm text-stone-700">{seasonLabels[day.season] || day.season.replace(/_/g, ' ')}</span>
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pb-2 border-b border-stone-200/50">
               <span className="laudia-h3">Salterio</span>
               <span className="text-sm text-stone-700">Semana {day.psalterWeek}</span>
             </div>
