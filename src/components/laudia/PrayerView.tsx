@@ -1,5 +1,5 @@
-import { LaudsOffice } from '@/types/laudia';
-import { PrayerSection, PrayerBlock, AiReflection } from '@/types/laudia';
+import React from 'react';
+import { LaudsOffice, PrayerSection, PrayerBlock } from '@/types/laudia';
 
 type PrayerViewProps = {
   day: LaudsOffice['day'];
@@ -25,9 +25,9 @@ export default function PrayerView({ day, sections, preferences, office }: Praye
     <div className="space-y-6">
       {sections.map((section) => (
         <div key={section.id} className="border-l-4 border-gray-200 pl-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {section.title}
-          </div>
+          </h3>
           <div className="space-y-4">
             {section.blocks.map((block) => (
               <div key={block.id} className="mb-4 last:mb-0">

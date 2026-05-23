@@ -1,4 +1,4 @@
-import { LaudsOffice } from '@/types/laudia';
+import { LaudsOffice, PrayerMode } from '@/types/laudia';
 import { getLiturgicalDay } from '@/lib/laudia/liturgical-calendar';
 
 /**
@@ -8,7 +8,7 @@ import { getLiturgicalDay } from '@/lib/laudia/liturgical-calendar';
  * @param date - Date for which to generate the sample office
  * @returns A LaudsOffice with placeholder texts and structure
  */
-export function generateSampleLaudsOffice(date: Date): LaudsOffice {
+export function generateSampleLaudsOffice(date: Date, preferences?: { preferredMode?: PrayerMode }): LaudsOffice {
   // Get basic liturgical info from our calendar (approximate)
   const day = getLiturgicalDay(date);
 
@@ -164,10 +164,7 @@ export function generateSampleLaudsOffice(date: Date): LaudsOffice {
           'benedictus-canticle',
           'CANTICLE_GOSPEL',
           '[Cántico evangélico (Benedictus) oficial pendiente de cargar/verificar]\n\nLucas 1,68-79',
-          {
-            name: 'Benedictus',
-            verses: '68-79'
-          },
+          undefined,
           'LITURGIA_HORAS_OFICIAL'
         ),
         // Gloria

@@ -1,14 +1,16 @@
 import TodayHeader from '@/components/laudia/TodayHeader';
-import { PrayerSection, PrayerBlock } from '@/types/laudia';
+import { LaudsOffice, PrayerSection, PrayerBlock } from '@/types/laudia';
 import { buildLaudsOffice } from '@/lib/laudia/prayer-builder';
 import { VerificationNotice } from '@/components/laudia/VerificationNotice';
 import FontSizeControls from '@/components/laudia/FontSizeControls';
 import ReadingModeToggle from '@/components/laudia/ReadingModeToggle';
-import { useState, useEffect } from 'react';
+import { LiturgicalValidatorPanel } from '@/components/laudia/LiturgicalValidatorPanel';
+import { validateOffice } from '@/lib/laudia/liturgical-validator';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function TodayPage() {
   const [today] = useState(new Date());
-  const [office, setOffice] = useState<any>(null);
+  const [office, setOffice] = useState<LaudsOffice | null>(null);
   const [fontSize, setFontSize] = useState<number>(16);
   const [showRubrics, setShowRubrics] = useState<boolean>(true);
   const [readingMode, setReadingMode] = useState<boolean>(false);
@@ -17,6 +19,8 @@ export default function TodayPage() {
     const built = buildLaudsOffice(today);
     setOffice(built);
   }, [today]);
+
+  const validation = useMemo(() => office ? validateOffice(office) : null, [office]);
 
   if (!office) {
     return (
@@ -67,6 +71,8 @@ export default function TodayPage() {
             <VerificationNotice office={office} />
           </div>
         )}
+
+        {validation && <LiturgicalValidatorPanel result={validation} />}
 
         {/* Prayer sections */}
         <div

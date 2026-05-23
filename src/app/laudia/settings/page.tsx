@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLaudiaPreferences, VisualMode, DefaultMode, PrayerType } from '@/hooks/laudia/useLaudiaPreferences';
 
 // ── Small building blocks ──────────────────────────────────────────────────

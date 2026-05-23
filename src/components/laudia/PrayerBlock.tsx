@@ -1,3 +1,4 @@
+import React from 'react';
 import { PrayerBlock, AiReflection } from '@/types/laudia';
 
 type PrayerBlockProps = {

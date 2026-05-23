@@ -1,7 +1,7 @@
 {
   "year": 2027,
   "liturgicalYear": 2026,
-  "generatedAt": "2026-05-23T11:10:19.440Z",
+  "generatedAt": "2026-05-23T16:31:47.869Z",
   "totalDays": 365,
   "days": [
     {
@@ -2266,7 +2266,7 @@
     },
     {
       "date": "2027-03-25",
-      "celebrationName": "Jueves Santo",
+      "celebrationName": "Solemnidad de la Anunciación del Señor",
       "season": "TRIDUO_PASCUAL",
       "rank": "SOLEMNIDAD",
       "color": "WHITE",
@@ -3134,7 +3134,7 @@
     },
     {
       "date": "2027-04-25",
-      "celebrationName": "Solemnidad de la Anunciación del Señor",
+      "celebrationName": "Tiempo de Pascua",
       "season": "PASCUA",
       "rank": "FERIA",
       "color": "WHITE",
@@ -5466,7 +5466,7 @@
     },
     {
       "date": "2027-07-24",
-      "celebrationName": "Solemnidad de la Natividad de San Juan Bautista",
+      "celebrationName": "Tiempo Ordinario",
       "season": "TIEMPO_ORDINARIO",
       "rank": "FERIA",
       "color": "GREEN",
@@ -5586,7 +5586,7 @@
     },
     {
       "date": "2027-07-29",
-      "celebrationName": "Solemnidad de los Santos Pedro y Pablo, Apóstoles",
+      "celebrationName": "Tiempo Ordinario",
       "season": "TIEMPO_ORDINARIO",
       "rank": "FERIA",
       "color": "GREEN",
@@ -6738,7 +6738,7 @@
     },
     {
       "date": "2027-09-15",
-      "celebrationName": "Solemnidad de la Asunción de la Bienaventurada Virgen María",
+      "celebrationName": "Tiempo Ordinario",
       "season": "TIEMPO_ORDINARIO",
       "rank": "FERIA",
       "color": "GREEN",

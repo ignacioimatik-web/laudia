@@ -1,15 +1,17 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LaudiaPage from './app/laudia/page';
 import TodayPage from './app/laudia/today/page';
 import PrayPage from './app/laudia/pray/page';
 import CalendarPage from './app/laudia/calendar/page';
 import LibraryPage from './app/laudia/library/page';
 import SettingsPage from './app/laudia/settings/page';
+import { SwUpdatePrompt } from './components/laudia/SwUpdatePrompt';
 
 function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen">
+        <SwUpdatePrompt />
         <Routes>
           <Route path="/laudia" element={<LaudiaPage />}>
             <Route index element={<TodayPage />} />
@@ -19,10 +21,8 @@ function App() {
             <Route path="library" element={<LibraryPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
-          {/* Redirect root to /laudia/today */}
-          <Route path="*" element={<LaudiaPage />}>
-            <Route index element={<TodayPage />} />
-          </Route>
+          <Route path="/" element={<Navigate to="/laudia/today" replace />} />
+          <Route path="*" element={<Navigate to="/laudia/today" replace />} />
         </Routes>
       </div>
     </BrowserRouter>

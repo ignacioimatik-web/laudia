@@ -345,10 +345,90 @@ export interface AiReflection {
 }
 
 /**
+ * Referencias a textos litúrgicos para un día del calendario.
+ * No contiene los textos literales, solo rutas/claves para localizarlos.
+ */
+export interface TextRefs {
+  hymn: string;
+  antiphon1: string;
+  psalm1: string;
+  canticleOt: string;
+  antiphon2: string;
+  psalmLaudate: string;
+  reading: string;
+  responsory: string;
+  benedictusAntiphon: string;
+  intercessions: string;
+  closingPrayer: string;
+}
+
+/**
+ * Entrada del calendario litúrgico (formato JSON en /data/laudia/calendar/).
+ * Representa un día con su metadata y referencias textuales.
+ */
+export interface CalendarDayEntry {
+  date: string;
+  celebrationName: string;
+  season: string;
+  rank: LiturgicalRank;
+  color: LiturgicalColor;
+  psalterWeek: PsalterWeek['week'];
+  easterRelated?: {
+    daysAfterEaster?: number;
+    daysBeforeEaster?: number;
+    feastGroup?: 'PRE_PASCHAL' | 'PASCHAL' | 'ORDINARY';
+  };
+  textRefs: TextRefs;
+  verificationStatus: 'pending' | 'needs_review' | 'verified';
+  sourceNote: string;
+  textSourceNote: string;
+}
+
+/**
+ * Archivo de calendario anual completo.
+ */
+export interface CalendarYearFile {
+  year: number;
+  liturgicalYear: number;
+  generatedAt: string;
+  totalDays: number;
+  days: CalendarDayEntry[];
+}
+
+/**
+ * Resultado de una validación litúrgica individual.
+ */
+export interface ValidationIssue {
+  severity: 'error' | 'warning' | 'info';
+  code: string;
+  message: string;
+  details?: string;
+  blockId?: string;
+  sectionId?: string;
+}
+
+/**
+ * Resultado completo de la validación de un LaudsOffice.
+ */
+export interface ValidationResult {
+  date: string;
+  celebrationName: string;
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
+  infos: ValidationIssue[];
+  /** true si hay al menos un error */
+  hasErrors: boolean;
+  /** true si hay al menos una advertencia */
+  hasWarnings: boolean;
+  /** true si no hay errores ni advertencias */
+  isClean: boolean;
+}
+
+/**
  * Resultado de la operación de construcción de una oficina litúrgica
  * Separa exitoso de error para manejo adecuado
  */
-export interface BuildOfficeResult {
+export type BuildOfficeResult = {
   success: true;
   office: LaudsOffice;
 } | {

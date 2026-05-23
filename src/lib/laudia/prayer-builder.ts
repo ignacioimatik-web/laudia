@@ -43,7 +43,8 @@ export function buildLaudsOffice(
     type: NonNullable<LaudsOffice['sections'][0]['blocks'][0]>['type'],
     contentHint: string,
     rubrics?: string,
-    source: OfficeSource = 'LITURGIA_HORAS_OFICIAL'
+    source: OfficeSource = 'LITURGIA_HORAS_OFICIAL',
+    canticleInfo?: { name: string; verses?: string }
   ): PrayerBlock {
     return {
       id,
@@ -51,10 +52,10 @@ export function buildLaudsOffice(
       officialText: `Texto oficial pendiente de cargar/verificar: ${contentHint}`,
       verificationStatus: 'PLACEHOLDER' as const,
       source,
-      aiReflection: null, // En una implementación real, esto podría venir de un servicio de IA
+      aiReflection: null,
       rubrics,
       psalmInfo: null,
-      canticleInfo: null,
+      canticleInfo: canticleInfo ?? null,
     };
   }
 
@@ -115,12 +116,9 @@ export function buildLaudsOffice(
       id,
       type,
       contentHint,
-      'Se sentado', // Rubrica típica para cánticos
+      'Se sentado',
       'LITURGIA_HORAS_OFICIAL',
-      undefined, // aiReflection
-      undefined, // rubrics (we'll set below if needed)
-      undefined, // psalmInfo
-      { name: nameHint, verses: versesHint } // canticleInfo
+      { name: nameHint, verses: versesHint }
     );
   }
 
@@ -249,11 +247,7 @@ export function buildLaudsOffice(
           'OUR_FATHER',
           'Oración del Señor',
           'Se dice de pie o de rodillas',
-          'LITURGIA_HORAS_OFICIAL',
-          undefined, // aiReflection
-          undefined, // rubrics (we'll set a common one)
-          undefined, // psalmInfo
-          undefined  // canticleInfo
+          'LITURGIA_HORAS_OFICIAL'
         ),
       ],
     },
@@ -325,23 +319,20 @@ export function addAiReflectionToBlock(
 ): LaudsOffice {
   // Crear una copia profunda mínima de las secciones y bloques afectados
   const newSections = office.sections.map(section => {
-    if (section.id === section.id) { // Siempre true, pero para evitar que TS se queje
-      const newBlocks = section.blocks.map(block => {
-        if (block.id === blockId) {
-          return {
-            ...block,
-            aiReflection: {
-              ...reflection,
-              id: `${blockId}-ai-reflection-${Date.now()}`, // ID simple para demo
-              isRead: false
-            }
-          };
-        }
-        return block;
-      });
-      return { ...section, blocks: newBlocks };
-    }
-    return section;
+    const newBlocks = section.blocks.map(block => {
+      if (block.id === blockId) {
+        return {
+          ...block,
+          aiReflection: {
+            ...reflection,
+            id: `${blockId}-ai-reflection-${Date.now()}`,
+            isRead: false
+          }
+        };
+      }
+      return block;
+    });
+    return { ...section, blocks: newBlocks };
   });
 
   return {
