@@ -1,5 +1,5 @@
 import { LaudsOffice, PrayerBlock } from '@/types/laudia';
-import { buildLaudsOffice } from '@/lib/laudia/prayer-builder';
+import { buildLaudsOfficeFromOfficialSource } from '@/lib/laudia/official-source';
 import { explainPrayerBlock, generateMorningReflection, generatePurposeForToday } from '@/lib/laudia/ai';
 import type { AiResponse } from '@/lib/laudia/ai';
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -302,20 +302,31 @@ export default function PrayPage() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const built = buildLaudsOffice(today);
-    setOffice(built);
-    const extracted = extractSteps(built);
-    setSteps(extracted);
+    let cancelled = false;
 
-    const saved = loadProgress(today);
-    if (saved && saved.mode === 'guided') {
-      setCurrentStep(Math.min(saved.stepIndex, extracted.length - 1));
-      setCompletedIds(new Set(saved.completedIds));
-      if (saved.stepIndex >= extracted.length - 1) {
-        setIsFinished(true);
+    (async () => {
+      const built = await buildLaudsOfficeFromOfficialSource(today);
+      if (cancelled) return;
+
+      setOffice(built);
+      const extracted = extractSteps(built);
+      setSteps(extracted);
+
+      const saved = loadProgress(today);
+      if (saved && saved.mode === 'guided') {
+        setCurrentStep(Math.min(saved.stepIndex, extracted.length - 1));
+        setCompletedIds(new Set(saved.completedIds));
+        if (saved.stepIndex >= extracted.length - 1) {
+          setIsFinished(true);
+        }
       }
-    }
-    setLoading(false);
+
+      setLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [today]);
 
   useEffect(() => {
