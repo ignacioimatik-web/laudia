@@ -9,6 +9,24 @@ SIZES=(48 72 96 128 192 256 384 512)
 
 mkdir -p "$OUTDIR"
 
+if ! command -v sips >/dev/null 2>&1; then
+  echo "  ! sips not found; skipping icon generation"
+  missing=0
+  for size in "${SIZES[@]}"; do
+    out="$OUTDIR/icon-${size}x${size}.png"
+    if [ ! -f "$out" ]; then
+      missing=1
+      break
+    fi
+  done
+  if [ "$missing" -eq 1 ] || [ ! -f "$OUTDIR/apple-touch-icon.png" ]; then
+    echo "  ! Missing required icons in $OUTDIR"
+    echo "  ! Run this script on macOS to generate PNG icons and commit them"
+    exit 1
+  fi
+  exit 0
+fi
+
 # Step 1: convert SVG to PNG at native resolution
 sips -s format png "$SRC" --out "$TMP/base.png" >/dev/null 2>&1
 
