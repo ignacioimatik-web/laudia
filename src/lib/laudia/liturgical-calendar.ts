@@ -7,6 +7,17 @@ import {
 } from '@/types/laudia';
 
 /**
+ * Convierte un Date a YYYY-MM-DD usando componentes de tiempo LOCAL.
+ * Evita el desfase de huso horario que causa .toISOString().
+ */
+function toLocalDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/**
  * Liturgical Calendar Engine - Basic Implementation
  * 
  * NOTE: This is a simplified liturgical calendar for demonstration purposes.
@@ -63,9 +74,9 @@ function getSundayAfter(date: Date, daysAfter: number): Date {
 function getSundayBefore(date: Date, daysBefore: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() - daysBefore);
-  // Adjust to previous Sunday if not already Sunday
+  // Adjust to previous Sunday
   const day = result.getDay(); // 0 = Sunday
-  const offset = (day === 0) ? 0 : day;
+  const offset = (day === 0) ? 7 : day;
   result.setDate(result.getDate() - offset);
   return result;
 }
@@ -184,8 +195,8 @@ export function getLiturgicalSeason(date: Date): LiturgicalSeason {
     return 'TRIDUO_PASCUAL';
   }
 
-  // Easter: Easter Sunday to Pentecost (exclusive)
-  if (date > feasts.easterSunday && date < feasts.pentecost) {
+  // Easter: Easter Sunday through Pentecost (exclusive of Pentecost)
+  if (date >= feasts.easterSunday && date < feasts.pentecost) {
     return 'PASCUA';
   }
 
@@ -210,14 +221,34 @@ export function getLiturgicalColor(date: Date): LiturgicalColor {
   const easter = getEasterDate(year);
   const feasts = getMoveableFeasts(year);
   const season = getLiturgicalSeason(date);
+  const rank = getLiturgicalRank(date);
 
   // Fixed dates with specific colors
   const month = date.getMonth(); // 0-11
   const day = date.getDate();
+  const dateStr = toLocalDateStr(date);
 
   // Christmas Day, Epiphany (if not transferred), Baptism of Lord, etc.
   if ((month === 11 && day === 25) || // Christmas
       (month === 0 && day === 6)) {   // Epiphany (Jan 6)
+    return 'WHITE';
+  }
+
+  // Solemnities override season color to WHITE
+  // (except specific penitential/martyr days)
+  if (rank === 'SOLEMNIDAD') {
+    // Ash Wednesday: VIOLET (penitential)
+    if (toLocalDateStr(feasts.ashWednesday) === dateStr) {
+      return 'VIOLET';
+    }
+    // Palm Sunday: RED (Passion)
+    if (toLocalDateStr(feasts.palmSunday) === dateStr) {
+      return 'RED';
+    }
+    // Good Friday: RED regardless
+    if (toLocalDateStr(feasts.goodFriday) === dateStr) {
+      return 'RED';
+    }
     return 'WHITE';
   }
 
@@ -231,10 +262,10 @@ export function getLiturgicalColor(date: Date): LiturgicalColor {
       return 'VIOLET';
     case 'TRIDUO_PASCUAL':
       // Holy Thursday (white), Good Friday (red/black), Holy Saturday (white/none)
-      if (date.getTime() === feasts.holyThursday.getTime()) {
+      if (toLocalDateStr(feasts.holyThursday) === dateStr) {
         return 'WHITE';
       }
-      if (date.getTime() === feasts.goodFriday.getTime()) {
+      if (toLocalDateStr(feasts.goodFriday) === dateStr) {
         return 'RED'; // sometimes black
       }
       return 'WHITE'; // Holy Saturday
@@ -262,12 +293,12 @@ export function getLiturgicalRank(date: Date): LiturgicalRank {
     [0, 1, 'SOLEMNIDAD'],   // Jan 1: Mary, Mother of God
     [0, 6, 'SOLEMNIDAD'],   // Jan 6: Epiphany
     [2, 19, 'SOLEMNIDAD'],  // Mar 19: St. Joseph
-    [3, 25, 'SOLEMNIDAD'],  // Mar 25: Annunciation
-    [5, 31, 'SOLEMNIDAD'],  // May 31: Visitation (approx)
-    [6, 24, 'SOLEMNIDAD'],  // Jun 24: St. John Baptist
-    [6, 29, 'SOLEMNIDAD'],  // Jun 29: Sts. Peter & Paul
-    [7, 25, 'SOLEMNIDAD'],  // Jul 25: St. James
-    [8, 15, 'SOLEMNIDAD'],  // Aug 15: Assumption
+    [2, 25, 'SOLEMNIDAD'],  // Mar 25: Annunciation
+    [4, 31, 'SOLEMNIDAD'],  // May 31: Visitation (approx)
+    [5, 24, 'SOLEMNIDAD'],  // Jun 24: St. John Baptist
+    [5, 29, 'SOLEMNIDAD'],  // Jun 29: Sts. Peter & Paul
+    [6, 25, 'SOLEMNIDAD'],  // Jul 25: St. James
+    [7, 15, 'SOLEMNIDAD'],  // Aug 15: Assumption
     [10, 1, 'SOLEMNIDAD'],  // Nov 1: All Saints
     [11, 8, 'SOLEMNIDAD'],  // Dec 8: Immaculate Conception
     [11, 25, 'SOLEMNIDAD'], // Dec 25: Christmas
@@ -280,11 +311,13 @@ export function getLiturgicalRank(date: Date): LiturgicalRank {
   }
 
   // Moveable solemnities (based on Easter)
+  const dateStr = toLocalDateStr(date);
   const moveableSolemnities: Date[] = [
     feasts.ashWednesday, // Actually not a solemnity, but penance day
     feasts.palmSunday,
     feasts.holyThursday,
     feasts.goodFriday,
+    feasts.holySaturday,
     feasts.easterSunday,
     feasts.ascension,
     feasts.pentecost,
@@ -294,7 +327,7 @@ export function getLiturgicalRank(date: Date): LiturgicalRank {
     feasts.christTheKing,
   ];
 
-  if (moveableSolemnities.some(d => d.getTime() === date.getTime())) {
+  if (moveableSolemnities.some(d => toLocalDateStr(d) === dateStr)) {
     return 'SOLEMNIDAD';
   }
 
@@ -349,8 +382,13 @@ export function getLiturgicalDay(date: Date): LiturgicalDay {
   // Title approximation: use rank and season or fixed names
   let title = '';
   const year = date.getFullYear();
-  const easter = getEasterDate(year);
   const feasts = getMoveableFeasts(year);
+  const dateStr = toLocalDateStr(date);
+
+  // Helper: check if date matches a feast Date (timezone-safe)
+  function isSameDate(a: Date, b: Date): boolean {
+    return toLocalDateStr(a) === toLocalDateStr(b);
+  }
 
   // Check fixed dates for titles
   const month = date.getMonth();
@@ -359,12 +397,12 @@ export function getLiturgicalDay(date: Date): LiturgicalDay {
     '0-1': 'Solemnidad de María, Madre de Dios',
     '0-6': 'Epifanía del Señor',
     '2-19': 'Solemnidad de San José',
-    '3-25': 'Solemnidad de la Anunciación del Señor',
-    '5-31': 'Visitación de la Bienaventurada Virgen María',
-    '6-24': 'Solemnidad de la Natividad de San Juan Bautista',
-    '6-29': 'Solemnidad de los Santos Pedro y Pablo, Apóstoles',
-    '7-25': 'Santiago, Apóstol',
-    '8-15': 'Solemnidad de la Asunción de la Bienaventurada Virgen María',
+    '2-25': 'Solemnidad de la Anunciación del Señor',
+    '4-31': 'Visitación de la Bienaventurada Virgen María',
+    '5-24': 'Solemnidad de la Natividad de San Juan Bautista',
+    '5-29': 'Solemnidad de los Santos Pedro y Pablo, Apóstoles',
+    '6-25': 'Santiago, Apóstol',
+    '7-15': 'Solemnidad de la Asunción de la Bienaventurada Virgen María',
     '10-1': 'Solemnidad de Todos los Santos',
     '11-8': 'Solemnidad de la Inmaculada Concepción de la Bienaventurada Virgen María',
     '11-25': 'Solemnidad de la Navidad del Señor',
@@ -374,29 +412,29 @@ export function getLiturgicalDay(date: Date): LiturgicalDay {
     title = fixedTitles[key];
   } else {
     // Moveable feasts titles
-    if (date.getTime() === feasts.ashWednesday.getTime()) {
+    if (isSameDate(date, feasts.ashWednesday)) {
       title = 'Miércoles de Ceniza';
-    } else if (date.getTime() === feasts.palmSunday.getTime()) {
+    } else if (isSameDate(date, feasts.palmSunday)) {
       title = 'Domingo de Ramos de la Pasión del Señor';
-    } else if (date.getTime() === feasts.holyThursday.getTime()) {
+    } else if (isSameDate(date, feasts.holyThursday)) {
       title = 'Jueves Santo';
-    } else if (date.getTime() === feasts.goodFriday.getTime()) {
+    } else if (isSameDate(date, feasts.goodFriday)) {
       title = 'Viernes Santo de la Pasión del Señor';
-    } else if (date.getTime() === feasts.holySaturday.getTime()) {
+    } else if (isSameDate(date, feasts.holySaturday)) {
       title = 'Sábado Santo';
-    } else if (date.getTime() === feasts.easterSunday.getTime()) {
+    } else if (isSameDate(date, feasts.easterSunday)) {
       title = 'Domingo de Pascua de la Resurrección del Señor';
-    } else if (date.getTime() === feasts.ascension.getTime()) {
+    } else if (isSameDate(date, feasts.ascension)) {
       title = 'Ascensión del Señor';
-    } else if (date.getTime() === feasts.pentecost.getTime()) {
+    } else if (isSameDate(date, feasts.pentecost)) {
       title = 'Pentecostés';
-    } else if (date.getTime() === feasts.trinitySunday.getTime()) {
+    } else if (isSameDate(date, feasts.trinitySunday)) {
       title = 'Santísima Trinidad';
-    } else if (date.getTime() === feasts.corpusChristi.getTime()) {
+    } else if (isSameDate(date, feasts.corpusChristi)) {
       title = 'Santísimo Cuerpo y Sangre de Cristo';
-    } else if (date.getTime() === feasts.sacredHeart.getTime()) {
+    } else if (isSameDate(date, feasts.sacredHeart)) {
       title = 'Sagrado Corazón de Jesús';
-    } else if (date.getTime() === feasts.christTheKing.getTime()) {
+    } else if (isSameDate(date, feasts.christTheKing)) {
       title = 'Nuestro Señor Jesucristo, Rey del Universo';
     } else {
       // Default title based on season
@@ -417,18 +455,18 @@ export function getLiturgicalDay(date: Date): LiturgicalDay {
   const hasProper = 
     rank === 'SOLEMNIDAD' || 
     rank === 'FIESTA' ||
-    date.getTime() === feasts.ashWednesday.getTime() ||
-    date.getTime() === feasts.palmSunday.getTime() ||
-    date.getTime() === feasts.holyThursday.getTime() ||
-    date.getTime() === feasts.goodFriday.getTime() ||
-    date.getTime() === feasts.holySaturday.getTime() ||
-    date.getTime() === feasts.easterSunday.getTime() ||
-    date.getTime() === feasts.ascension.getTime() ||
-    date.getTime() === feasts.pentecost.getTime() ||
-    date.getTime() === feasts.trinitySunday.getTime() ||
-    date.getTime() === feasts.corpusChristi.getTime() ||
-    date.getTime() === feasts.sacredHeart.getTime() ||
-    date.getTime() === feasts.christTheKing.getTime();
+    isSameDate(date, feasts.ashWednesday) ||
+    isSameDate(date, feasts.palmSunday) ||
+    isSameDate(date, feasts.holyThursday) ||
+    isSameDate(date, feasts.goodFriday) ||
+    isSameDate(date, feasts.holySaturday) ||
+    isSameDate(date, feasts.easterSunday) ||
+    isSameDate(date, feasts.ascension) ||
+    isSameDate(date, feasts.pentecost) ||
+    isSameDate(date, feasts.trinitySunday) ||
+    isSameDate(date, feasts.corpusChristi) ||
+    isSameDate(date, feasts.sacredHeart) ||
+    isSameDate(date, feasts.christTheKing);
 
   // Proper type approximation
   let properType: LiturgicalDay['properType'] | undefined;
@@ -448,13 +486,13 @@ export function getLiturgicalDay(date: Date): LiturgicalDay {
       feasts.sacredHeart,
       feasts.christTheKing,
     ];
-    if (moveable.some(d => d.getTime() === date.getTime())) {
+    if (moveable.some(d => isSameDate(date, d))) {
       properType = 'TEMPORAL';
     } else {
       // Fixed dates could be SANCTORAL or COMMON
       // For simplicity, assign SANCTORAL to major fixed solemnities
       const solemnFixed = [
-        [0,1], [0,6], [2,19], [3,25], [6,24], [6,29], [7,25], [8,15], [10,1], [11,8], [11,25]
+        [0,1], [0,6], [2,19], [2,25], [5,24], [5,29], [6,25], [7,15], [10,1], [11,8], [11,25]
       ];
       if (solemnFixed.some(([m,d]) => month === m && day === d)) {
         properType = 'SANCTORAL';
@@ -465,7 +503,7 @@ export function getLiturgicalDay(date: Date): LiturgicalDay {
   }
 
   return {
-    date: date.toISOString().split('T')[0],
+    date: toLocalDateStr(date),
     title,
     season,
     color,
@@ -497,7 +535,7 @@ export function getMonthCalendar(year: number, month: number): CalendarDay[] {
     const liturgicalDay = getLiturgicalDay(current);
 
     const calendarDay: CalendarDay = {
-      date: current.toISOString().split('T')[0],
+      date: toLocalDateStr(current),
       dayOfMonth: day,
       dayOfWeek: current.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6,
       title: liturgicalDay.title.length > 15 

@@ -9,7 +9,8 @@
     "icons": "bash scripts/generate-icons.sh",
     "prebuild": "bash scripts/generate-icons.sh",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:calendar": "npx tsx scripts/generate-calendar.ts"
   },
   "dependencies": {
     "react": "^18.2.0",
