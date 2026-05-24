@@ -2,7 +2,8 @@ import { LaudsOffice, PrayerBlock } from '@/types/laudia';
 import { buildLaudsOfficeFromOfficialSource } from '@/lib/laudia/official-source';
 import { explainPrayerBlock, generateMorningReflection, generatePurposeForToday } from '@/lib/laudia/ai';
 import type { AiResponse } from '@/lib/laudia/ai';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -280,11 +281,21 @@ function formatTimeRemaining(totalSeconds: number): string {
 // ── Page Component ─────────────────────────────────────────────────────────
 
 export default function PrayPage() {
-  const [today] = useState(() => {
+  const [searchParams] = useSearchParams();
+  const prayerDate = useMemo(() => {
+    const raw = searchParams.get('date');
+    if (raw && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      const parsed = new Date(`${raw}T00:00:00`);
+      if (!Number.isNaN(parsed.getTime())) {
+        parsed.setHours(0, 0, 0, 0);
+        return parsed;
+      }
+    }
+
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     return d;
-  });
+  }, [searchParams]);
 
   const [office, setOffice] = useState<LaudsOffice | null>(null);
   const [steps, setSteps] = useState<PrayStep[]>([]);
@@ -305,14 +316,14 @@ export default function PrayPage() {
     let cancelled = false;
 
     (async () => {
-      const built = await buildLaudsOfficeFromOfficialSource(today);
+      const built = await buildLaudsOfficeFromOfficialSource(prayerDate);
       if (cancelled) return;
 
       setOffice(built);
       const extracted = extractSteps(built);
       setSteps(extracted);
 
-      const saved = loadProgress(today);
+      const saved = loadProgress(prayerDate);
       if (saved && saved.mode === 'guided') {
         setCurrentStep(Math.min(saved.stepIndex, extracted.length - 1));
         setCompletedIds(new Set(saved.completedIds));
@@ -327,20 +338,20 @@ export default function PrayPage() {
     return () => {
       cancelled = true;
     };
-  }, [today]);
+  }, [prayerDate]);
 
   useEffect(() => {
     if (loading || office === null) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      saveProgress(today, {
+      saveProgress(prayerDate, {
         stepIndex: currentStep,
         completedIds: Array.from(completedIds),
         mode,
       });
     }, 200);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [currentStep, completedIds, mode, loading, today, office]);
+  }, [currentStep, completedIds, mode, loading, prayerDate, office]);
 
   const totalSteps = steps.length;
   const step = steps[currentStep];
@@ -365,9 +376,9 @@ export default function PrayPage() {
       const allIds = new Set(steps.map(s => s.id));
       setCompletedIds(allIds);
       setIsFinished(true);
-      clearProgress(today);
+      clearProgress(prayerDate);
     }
-  }, [currentStep, totalSteps, steps, goTo, today]);
+  }, [currentStep, totalSteps, steps, goTo, prayerDate]);
 
   const goPrev = useCallback(() => {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
@@ -388,15 +399,15 @@ export default function PrayPage() {
     setCurrentStep(0);
     setCompletedIds(new Set());
     setIsFinished(false);
-    clearProgress(today);
-  }, [today]);
+    clearProgress(prayerDate);
+  }, [prayerDate]);
 
   const resetPrayer = useCallback(() => {
     setCurrentStep(0);
     setCompletedIds(new Set());
     setIsFinished(false);
-    clearProgress(today);
-  }, [today]);
+    clearProgress(prayerDate);
+  }, [prayerDate]);
 
   // ── AI handlers ──────────────────────────────────────────────────────────
 
