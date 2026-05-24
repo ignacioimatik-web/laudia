@@ -54,33 +54,50 @@ function htmlToPlainText(html) {
   );
 }
 
-function formatUsccbPath(date) {
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  const yy = String(date.getFullYear()).slice(-2);
-  return `${mm}${dd}${yy}`;
+function formatYmdCompact(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}${m}${d}`;
 }
 
-function extractUsccbMain(html) {
-  const start = html.search(/Reading\s+1/i);
-  const end = html.search(/Lectionary for Mass/i);
-  if (start !== -1 && end !== -1 && end > start) {
-    return html.slice(start, end);
-  }
-  return html;
-}
+async function fetchEvangelizoPart(date, type, content = null) {
+  const params = new URLSearchParams({
+    date: formatYmdCompact(date),
+    type,
+    lang: 'SP',
+  });
+  if (content) params.set('content', content);
 
-async function fetchUsccbReadings(date) {
-  const path = formatUsccbPath(date);
-  const url = `https://bible.usccb.org/bible/readings/${path}.cfm`;
+  const url = `https://feed.evangelizo.org/v2/reader.php?${params.toString()}`;
   const response = await fetch(url);
   if (!response.ok) return null;
-  const html = await response.text();
-  const main = extractUsccbMain(html);
+  const text = await response.text();
+  if (/^\s*<!DOCTYPE html/i.test(text)) return null;
+  return { url, text: decodeEntities(text).replace(/<br\s*\/?>/gi, '\n').trim() };
+}
+
+async function fetchEvangelizoReadings(date) {
+  const title = await fetchEvangelizoPart(date, 'liturgic_t');
+  const readingFr = await fetchEvangelizoPart(date, 'reading', 'FR');
+  const psalm = await fetchEvangelizoPart(date, 'reading', 'PS');
+  const readingSr = await fetchEvangelizoPart(date, 'reading', 'SR');
+  const gospel = await fetchEvangelizoPart(date, 'reading', 'GSP');
+
+  if (!title && !readingFr && !psalm && !readingSr && !gospel) return null;
+
+  const parts = [
+    title ? `Titulo liturgico\n${title.text}` : null,
+    readingFr ? `Primera lectura\n${readingFr.text}` : null,
+    psalm ? `Salmo\n${psalm.text}` : null,
+    readingSr ? `Segunda lectura\n${readingSr.text}` : null,
+    gospel ? `Evangelio\n${gospel.text}` : null,
+  ].filter(Boolean);
+
   return {
-    url,
-    html,
-    plainText: htmlToPlainText(main),
+    url: gospel?.url ?? title?.url ?? readingFr?.url,
+    html: `<!-- EVANGELIZO_FALLBACK -->\n${parts.join('\n\n')}`,
+    plainText: `[EVANGELIZO_DAILY_READINGS]\n${parts.join('\n\n')}`,
   };
 }
 
@@ -120,7 +137,7 @@ async function main() {
     const hasLaudesSource = Boolean(result && result.html);
     let fallbackReadings = null;
     if (!hasLaudesSource) {
-      fallbackReadings = await fetchUsccbReadings(current);
+      fallbackReadings = await fetchEvangelizoReadings(current);
     }
 
     if (!hasLaudesSource && !fallbackReadings) {
@@ -138,7 +155,7 @@ async function main() {
       plain_text: hasLaudesSource
         ? htmlToPlainText(result.html)
         : fallbackReadings
-          ? `[USCCB_DAILY_READINGS]\n${fallbackReadings.plainText}`
+          ? fallbackReadings.plainText
           : '[MISSING_SOURCE] Texto de Laudes no disponible en origen para esta fecha.',
       fetched_at: new Date().toISOString(),
     };
