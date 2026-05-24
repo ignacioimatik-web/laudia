@@ -10,9 +10,11 @@
     "prebuild": "bash scripts/generate-icons.sh",
     "build": "vite build",
     "preview": "vite preview",
-    "generate:calendar": "npx tsx scripts/generate-calendar.ts"
+    "generate:calendar": "npx tsx scripts/generate-calendar.ts",
+    "backfill:laudes:supabase": "node scripts/backfill-laudes-supabase.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0"
