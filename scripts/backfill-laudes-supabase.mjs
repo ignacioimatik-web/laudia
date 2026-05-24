@@ -54,6 +54,36 @@ function htmlToPlainText(html) {
   );
 }
 
+function formatUsccbPath(date) {
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const yy = String(date.getFullYear()).slice(-2);
+  return `${mm}${dd}${yy}`;
+}
+
+function extractUsccbMain(html) {
+  const start = html.search(/Reading\s+1/i);
+  const end = html.search(/Lectionary for Mass/i);
+  if (start !== -1 && end !== -1 && end > start) {
+    return html.slice(start, end);
+  }
+  return html;
+}
+
+async function fetchUsccbReadings(date) {
+  const path = formatUsccbPath(date);
+  const url = `https://bible.usccb.org/bible/readings/${path}.cfm`;
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  const html = await response.text();
+  const main = extractUsccbMain(html);
+  return {
+    url,
+    html,
+    plainText: htmlToPlainText(main),
+  };
+}
+
 async function fetchLaudesHtml(date) {
   const year = date.getFullYear();
   const month = MONTH_SEGMENTS[date.getMonth()];
@@ -87,18 +117,29 @@ async function main() {
     current.setDate(startDate.getDate() + i);
 
     const result = await fetchLaudesHtml(current);
-    const hasSource = Boolean(result && result.html);
-    if (!hasSource) {
+    const hasLaudesSource = Boolean(result && result.html);
+    let fallbackReadings = null;
+    if (!hasLaudesSource) {
+      fallbackReadings = await fetchUsccbReadings(current);
+    }
+
+    if (!hasLaudesSource && !fallbackReadings) {
       missingSource += 1;
     }
 
+    const hasAnySource = hasLaudesSource || Boolean(fallbackReadings);
+
     const payload = {
       prayer_date: formatDate(current),
-      source_url: result.url,
-      raw_html: hasSource ? result.html : '<!-- MISSING_SOURCE -->',
-      plain_text: hasSource
+      source_url: hasLaudesSource ? result.url : (fallbackReadings?.url ?? result.url),
+      raw_html: hasLaudesSource
+        ? result.html
+        : (fallbackReadings?.html ?? '<!-- MISSING_SOURCE -->'),
+      plain_text: hasLaudesSource
         ? htmlToPlainText(result.html)
-        : '[MISSING_SOURCE] Texto de Laudes no disponible en origen para esta fecha.',
+        : fallbackReadings
+          ? `[USCCB_DAILY_READINGS]\n${fallbackReadings.plainText}`
+          : '[MISSING_SOURCE] Texto de Laudes no disponible en origen para esta fecha.',
       fetched_at: new Date().toISOString(),
     };
 
