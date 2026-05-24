@@ -5,6 +5,7 @@ import PrayPage from './app/laudia/pray/page';
 import CalendarPage from './app/laudia/calendar/page';
 import EvangelioPage from './app/laudia/evangelio/page';
 import LibraryPage from './app/laudia/library/page';
+import LiturgiaPage from './app/laudia/liturgia/page';
 import SettingsPage from './app/laudia/settings/page';
 import { SwUpdatePrompt } from './components/laudia/SwUpdatePrompt';
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="calendar" element={<CalendarPage />} />
             <Route path="evangelio" element={<EvangelioPage />} />
             <Route path="library" element={<LibraryPage />} />
+            <Route path="liturgia" element={<LiturgiaPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
           <Route path="/" element={<Navigate to="/laudia/today" replace />} />
