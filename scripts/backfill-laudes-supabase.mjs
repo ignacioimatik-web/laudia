@@ -68,7 +68,7 @@ async function fetchLaudesHtml(date) {
     }
   }
 
-  return null;
+  return { url: candidates[0], html: null };
 }
 
 async function main() {
@@ -80,23 +80,25 @@ async function main() {
   startDate.setHours(0, 0, 0, 0);
 
   let inserted = 0;
-  let skipped = 0;
+  let missingSource = 0;
 
   for (let i = 0; i < 365; i += 1) {
     const current = new Date(startDate);
     current.setDate(startDate.getDate() + i);
 
     const result = await fetchLaudesHtml(current);
-    if (!result) {
-      skipped += 1;
-      continue;
+    const hasSource = Boolean(result && result.html);
+    if (!hasSource) {
+      missingSource += 1;
     }
 
     const payload = {
       prayer_date: formatDate(current),
       source_url: result.url,
-      raw_html: result.html,
-      plain_text: htmlToPlainText(result.html),
+      raw_html: hasSource ? result.html : '<!-- MISSING_SOURCE -->',
+      plain_text: hasSource
+        ? htmlToPlainText(result.html)
+        : '[MISSING_SOURCE] Texto de Laudes no disponible en origen para esta fecha.',
       fetched_at: new Date().toISOString(),
     };
 
@@ -111,7 +113,7 @@ async function main() {
     }
   }
 
-  process.stdout.write(`Done. inserted=${inserted}, skipped=${skipped}\n`);
+  process.stdout.write(`Done. inserted=${inserted}, missing_source=${missingSource}\n`);
 }
 
 main().catch((error) => {
