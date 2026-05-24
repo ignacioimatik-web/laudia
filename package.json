@@ -11,7 +11,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "generate:calendar": "npx tsx scripts/generate-calendar.ts",
-    "backfill:laudes:supabase": "node scripts/backfill-laudes-supabase.mjs"
+    "backfill:laudes:supabase": "node scripts/backfill-laudes-supabase.mjs",
+    "fill:missing:liturgia": "node scripts/fill-missing-from-liturgia.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
