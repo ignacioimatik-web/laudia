@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import Breviarium from 'breviarium';
 
 const MONTH_SEGMENTS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -118,6 +119,55 @@ async function fetchLaudesHtml(date) {
   return { url: candidates[0], html: null };
 }
 
+function formatBreviariumLaudes(laudesItem) {
+  const ordered = [
+    ['himno', 'Himno'],
+    ['primer_salmo_antifona', 'Antifona 1'],
+    ['primer_salmo_cita', 'Salmo 1 cita'],
+    ['primer_salmo_texto', 'Salmo 1'],
+    ['segundo_salmo_antifona', 'Antifona 2'],
+    ['segundo_salmo_cita', 'Salmo 2 cita'],
+    ['segundo_salmo_texto', 'Salmo 2'],
+    ['tercer_salmo_antifona', 'Antifona 3'],
+    ['tercer_salmo_cita', 'Salmo 3 cita'],
+    ['tercer_salmo_texto', 'Salmo 3'],
+    ['lectura_biblica_cita', 'Lectura biblica cita'],
+    ['lectura_biblica', 'Lectura biblica'],
+    ['responsorios', 'Responsorio'],
+    ['cantico_evangelico_antifona', 'Antifona Benedictus'],
+    ['preces_intro', 'Preces introduccion'],
+    ['preces_respuesta', 'Preces respuesta'],
+    ['preces_contenido', 'Preces'],
+    ['invitacion_padrenuestro', 'Padrenuestro introduccion'],
+    ['oracion_final', 'Oracion final'],
+  ];
+
+  return ordered
+    .map(([key, label]) => {
+      const value = laudesItem[key];
+      if (!value) return null;
+      return `${label}\n${String(value).trim()}`;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+async function fetchBreviariumLaudes(date) {
+  try {
+    const breviarium = new Breviarium(date);
+    const data = await breviarium.getLaudes(date);
+    if (!Array.isArray(data) || data.length === 0 || !data[0]) return null;
+    const item = data[0];
+    return {
+      url: 'breviarium://core/getLaudes',
+      html: JSON.stringify(item),
+      plainText: `[BREVIARIUM_CORE]\n${formatBreviariumLaudes(item)}`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function main() {
   const supabaseUrl = getEnv('SUPABASE_URL');
   const supabaseServiceRoleKey = getEnv('SUPABASE_SERVICE_ROLE_KEY');
@@ -133,7 +183,8 @@ async function main() {
     const current = new Date(startDate);
     current.setDate(startDate.getDate() + i);
 
-    const result = await fetchLaudesHtml(current);
+    const breviariumResult = await fetchBreviariumLaudes(current);
+    const result = breviariumResult ?? await fetchLaudesHtml(current);
     const hasLaudesSource = Boolean(result && result.html);
     let fallbackReadings = null;
     if (!hasLaudesSource) {
