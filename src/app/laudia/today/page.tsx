@@ -7,6 +7,7 @@ import ReadingModeToggle from '@/components/laudia/ReadingModeToggle';
 import { LiturgicalValidatorPanel } from '@/components/laudia/LiturgicalValidatorPanel';
 import { validateOffice } from '@/lib/laudia/liturgical-validator';
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function TodayPage() {
   const [today] = useState(new Date());
@@ -73,6 +74,12 @@ export default function TodayPage() {
             readingMode={readingMode}
             onToggle={() => setReadingMode(!readingMode)}
           />
+          <Link
+            to={`/laudia/evangelio?date=${office.day.date}`}
+            className="laudia-btn-secondary !py-2 !px-3 text-xs"
+          >
+            Ver Evangelio del día
+          </Link>
         </div>
 
         {/* Verification notice if needed */}
