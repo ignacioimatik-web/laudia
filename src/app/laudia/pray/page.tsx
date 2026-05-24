@@ -311,6 +311,14 @@ export default function PrayPage() {
   const [dailyPurpose, setDailyPurpose] = useState<AiResponse | null>(null);
   const [showAIPanel, setShowAIPanel] = useState<'none' | 'reflection' | 'purpose'>('none');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedDateLabel = useMemo(() => {
+    return prayerDate.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }, [prayerDate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -456,8 +464,9 @@ export default function PrayPage() {
       <div className="min-h-screen laudia-gradient p-4">
         <div className="max-w-3xl mx-auto py-6">
           <div className="text-center mb-6 space-y-1">
-            <p className="text-xs text-stone-400 uppercase tracking-wider">{office.day.title}</p>
+            <p className="text-xs text-stone-500 uppercase tracking-wider">Rezar • {selectedDateLabel}</p>
             <h1 className="laudia-h1">Laudes</h1>
+            <p className="text-sm text-stone-600">{office.day.title}</p>
             <span className="inline-block text-xs font-medium px-3 py-1 rounded-full bg-stone-200/70 text-stone-600">
               Modo experto
             </span>
@@ -607,9 +616,10 @@ export default function PrayPage() {
         {/* Header */}
         <div className="text-center mb-5 space-y-1">
           {office && (
-            <p className="text-xs text-stone-400 uppercase tracking-wider">{office.day.title}</p>
+            <p className="text-xs text-stone-500 uppercase tracking-wider">Rezar • {selectedDateLabel}</p>
           )}
           <h1 className="laudia-h1">Laudes</h1>
+          {office && <p className="text-sm text-stone-600">{office.day.title}</p>}
           <span className="inline-block text-xs font-medium px-3 py-1 rounded-full bg-stone-200/70 text-stone-600">
             Modo guía
           </span>
