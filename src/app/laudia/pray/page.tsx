@@ -311,7 +311,7 @@ function pickWarmSpanishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVo
   const spanishSpain = spanish.filter((voice) => voice.lang.toLowerCase().startsWith('es-es'));
   const preferred = [...spanishSpain, ...spanish].find((voice) => {
     const name = voice.name.toLowerCase();
-    return name.includes('monica') || name.includes('paulina') || name.includes('helena') || name.includes('female') || name.includes('mujer');
+    return name.includes('jorge') || name.includes('diego') || name.includes('carlos') || name.includes('male') || name.includes('hombre');
   });
 
   return preferred ?? spanishSpain[0] ?? spanish[0] ?? null;
@@ -352,6 +352,7 @@ export default function PrayPage() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speechCancelled = useRef(false);
   const [isNarrating, setIsNarrating] = useState(false);
+  const [isNarrationPaused, setIsNarrationPaused] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const selectedDateLabel = useMemo(() => {
     return prayerDate.toLocaleDateString('es-ES', {
@@ -502,6 +503,19 @@ export default function PrayPage() {
     speechCancelled.current = true;
     window.speechSynthesis.cancel();
     setIsNarrating(false);
+    setIsNarrationPaused(false);
+  }, []);
+
+  const pauseNarration = useCallback(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    window.speechSynthesis.pause();
+    setIsNarrationPaused(true);
+  }, []);
+
+  const resumeNarration = useCallback(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    window.speechSynthesis.resume();
+    setIsNarrationPaused(false);
   }, []);
 
   const startNarration = useCallback(() => {
@@ -516,6 +530,7 @@ export default function PrayPage() {
     setVoiceError(null);
     speechCancelled.current = false;
     window.speechSynthesis.cancel();
+    setIsNarrationPaused(false);
 
     const selectedVoice = pickWarmSpanishVoice(window.speechSynthesis.getVoices());
     const chunks = splitForSpeech(fullText);
@@ -526,6 +541,7 @@ export default function PrayPage() {
     const speakChunk = (index: number) => {
       if (speechCancelled.current || index >= chunks.length) {
         setIsNarrating(false);
+        setIsNarrationPaused(false);
         return;
       }
 
@@ -540,6 +556,7 @@ export default function PrayPage() {
       utterance.onerror = () => {
         setVoiceError('No se pudo completar la locución del rezo.');
         setIsNarrating(false);
+        setIsNarrationPaused(false);
       };
 
       window.speechSynthesis.speak(utterance);
@@ -581,11 +598,22 @@ export default function PrayPage() {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 flex-wrap">
               <button
-                onClick={isNarrating ? stopNarration : startNarration}
+                onClick={
+                  !isNarrating
+                    ? startNarration
+                    : isNarrationPaused
+                      ? resumeNarration
+                      : pauseNarration
+                }
                 className="laudia-btn-secondary text-xs"
               >
-                {isNarrating ? 'Detener voz IA' : 'Escuchar Laudes con voz IA'}
+                {!isNarrating ? 'Escuchar Laudes con voz IA' : isNarrationPaused ? 'Reanudar voz IA' : 'Pausar voz IA'}
               </button>
+              {isNarrating && (
+                <button onClick={stopNarration} className="laudia-btn-ghost text-xs">
+                  Detener y reiniciar
+                </button>
+              )}
               <button onClick={toggleMode} className="laudia-btn-ghost">
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" />
@@ -825,11 +853,22 @@ export default function PrayPage() {
         <div className="mt-6 space-y-3">
           <div className="text-center">
             <button
-              onClick={isNarrating ? stopNarration : startNarration}
+              onClick={
+                !isNarrating
+                  ? startNarration
+                  : isNarrationPaused
+                    ? resumeNarration
+                    : pauseNarration
+              }
               className="laudia-btn-secondary text-sm"
             >
-              {isNarrating ? 'Detener voz IA' : 'Escuchar todo el rezo con voz IA'}
+              {!isNarrating ? 'Escuchar todo el rezo con voz IA' : isNarrationPaused ? 'Reanudar voz IA' : 'Pausar voz IA'}
             </button>
+            {isNarrating && (
+              <button onClick={stopNarration} className="laudia-btn-ghost text-xs ml-2">
+                Detener y reiniciar
+              </button>
+            )}
             {voiceError && <p className="mt-2 text-xs text-amber-700">{voiceError}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
