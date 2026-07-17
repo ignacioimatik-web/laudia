@@ -539,7 +539,7 @@ export default function PrayPage() {
 
     const context = new AudioContextClass();
     audioContext.current = context;
-    await context.resume();
+    const resumeRequest = context.resume();
     setIsNarrating(true);
 
     try {
@@ -562,6 +562,11 @@ export default function PrayPage() {
         const buffer = await response.arrayBuffer();
         const decoded = await context.decodeAudioData(buffer);
         if (speechCancelled.current) break;
+
+        await resumeRequest;
+        if (context.state !== 'running') {
+          await context.resume();
+        }
 
         setIsVoiceLoading(false);
         const source = context.createBufferSource();
