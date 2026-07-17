@@ -287,7 +287,7 @@ function buildNarrationText(steps: PrayStep[]): string {
     .join('\n\n');
 }
 
-function splitForSpeech(text: string, maxChunk = 900): string[] {
+function splitForSpeech(text: string, maxChunk = 1_800): string[] {
   const normalized = text.replace(/\s+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   if (normalized.length <= maxChunk) return [normalized];
 
@@ -302,19 +302,6 @@ function splitForSpeech(text: string, maxChunk = 900): string[] {
   }
   if (pending) chunks.push(pending);
   return chunks;
-}
-
-function pickWarmSpanishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  const spanish = voices.filter((voice) => voice.lang.toLowerCase().startsWith('es'));
-  if (spanish.length === 0) return null;
-
-  const spanishSpain = spanish.filter((voice) => voice.lang.toLowerCase().startsWith('es-es'));
-  const preferred = [...spanishSpain, ...spanish].find((voice) => {
-    const name = voice.name.toLowerCase();
-    return name.includes('jorge') || name.includes('diego') || name.includes('carlos') || name.includes('male') || name.includes('hombre');
-  });
-
-  return preferred ?? spanishSpain[0] ?? spanish[0] ?? null;
 }
 
 // ── Page Component ─────────────────────────────────────────────────────────
@@ -351,8 +338,12 @@ export default function PrayPage() {
   const [showAIPanel, setShowAIPanel] = useState<'none' | 'reflection' | 'purpose'>('none');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speechCancelled = useRef(false);
+  const narrationAbort = useRef<AbortController | null>(null);
+  const audioContext = useRef<AudioContext | null>(null);
+  const audioSource = useRef<AudioBufferSourceNode | null>(null);
   const [isNarrating, setIsNarrating] = useState(false);
   const [isNarrationPaused, setIsNarrationPaused] = useState(false);
+  const [isVoiceLoading, setIsVoiceLoading] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const selectedDateLabel = useMemo(() => {
     return prayerDate.toLocaleDateString('es-ES', {
@@ -499,28 +490,40 @@ export default function PrayPage() {
   }, [aiBusy, office]);
 
   const stopNarration = useCallback(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
     speechCancelled.current = true;
-    window.speechSynthesis.cancel();
+    narrationAbort.current?.abort();
+    narrationAbort.current = null;
+    try {
+      audioSource.current?.stop();
+    } catch {
+      // La fuente puede haber terminado antes de pulsar detener.
+    }
+    audioSource.current = null;
+    if (audioContext.current) {
+      void audioContext.current.close();
+      audioContext.current = null;
+    }
     setIsNarrating(false);
     setIsNarrationPaused(false);
+    setIsVoiceLoading(false);
   }, []);
 
   const pauseNarration = useCallback(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    window.speechSynthesis.pause();
-    setIsNarrationPaused(true);
+    if (!audioContext.current) return;
+    void audioContext.current.suspend().then(() => setIsNarrationPaused(true));
   }, []);
 
   const resumeNarration = useCallback(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    window.speechSynthesis.resume();
-    setIsNarrationPaused(false);
+    if (!audioContext.current) return;
+    void audioContext.current.resume().then(() => setIsNarrationPaused(false)).catch(() => {
+      setVoiceError('Toca de nuevo para reanudar el audio.');
+    });
   }, []);
 
-  const startNarration = useCallback(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) {
-      setVoiceError('Tu navegador no soporta lectura por voz.');
+  const startNarration = useCallback(async () => {
+    const AudioContextClass = window.AudioContext;
+    if (!AudioContextClass) {
+      setVoiceError('Tu navegador no soporta la reproducción de audio.');
       return;
     }
 
@@ -529,54 +532,70 @@ export default function PrayPage() {
 
     setVoiceError(null);
     speechCancelled.current = false;
-    window.speechSynthesis.cancel();
     setIsNarrationPaused(false);
 
-    const selectedVoice = pickWarmSpanishVoice(window.speechSynthesis.getVoices());
     const chunks = splitForSpeech(fullText);
     if (chunks.length === 0) return;
 
+    const context = new AudioContextClass();
+    audioContext.current = context;
+    await context.resume();
     setIsNarrating(true);
 
-    const speakChunk = (index: number) => {
-      if (speechCancelled.current || index >= chunks.length) {
-        setIsNarrating(false);
-        setIsNarrationPaused(false);
-        return;
+    try {
+      for (const chunk of chunks) {
+        if (speechCancelled.current) break;
+        setIsVoiceLoading(true);
+        const controller = new AbortController();
+        narrationAbort.current = controller;
+        const response = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: chunk }),
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => null) as { error?: string } | null;
+          throw new Error(payload?.error ?? 'No se pudo generar la voz.');
+        }
+
+        const buffer = await response.arrayBuffer();
+        const decoded = await context.decodeAudioData(buffer);
+        if (speechCancelled.current) break;
+
+        setIsVoiceLoading(false);
+        const source = context.createBufferSource();
+        audioSource.current = source;
+        source.buffer = decoded;
+        source.connect(context.destination);
+
+        await new Promise<void>((resolve, reject) => {
+          source.onended = () => resolve();
+          try {
+            source.start();
+          } catch (error) {
+            reject(error);
+          }
+        });
       }
-
-      const utterance = new SpeechSynthesisUtterance(chunks[index]);
-      utterance.lang = 'es-ES';
-      utterance.rate = 0.92;
-      utterance.pitch = 1.0;
-      utterance.volume = 1;
-      if (selectedVoice) utterance.voice = selectedVoice;
-
-      utterance.onend = () => speakChunk(index + 1);
-      utterance.onerror = () => {
-        setVoiceError('No se pudo completar la locución del rezo.');
-        setIsNarrating(false);
-        setIsNarrationPaused(false);
-      };
-
-      window.speechSynthesis.speak(utterance);
-    };
-
-    speakChunk(0);
+    } catch (error) {
+      if (!speechCancelled.current) {
+        setVoiceError(error instanceof Error ? error.message : 'No se pudo completar la locución.');
+      }
+    } finally {
+      narrationAbort.current = null;
+      audioSource.current = null;
+      setIsVoiceLoading(false);
+      setIsNarrating(false);
+      setIsNarrationPaused(false);
+      if (audioContext.current === context) {
+        void context.close();
+        audioContext.current = null;
+      }
+    }
   }, [steps]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    const preloadVoices = () => {
-      window.speechSynthesis.getVoices();
-    };
-    preloadVoices();
-    window.speechSynthesis.addEventListener('voiceschanged', preloadVoices);
-    return () => {
-      window.speechSynthesis.removeEventListener('voiceschanged', preloadVoices);
-      window.speechSynthesis.cancel();
-    };
-  }, []);
+  useEffect(() => stopNarration, [stopNarration]);
 
   // ═══════════════════════════════════════════════════════════════════════
   // EXPERT MODE
@@ -605,9 +624,16 @@ export default function PrayPage() {
                       ? resumeNarration
                       : pauseNarration
                 }
-                className="laudia-btn-secondary text-xs"
+                disabled={isVoiceLoading}
+                className="laudia-btn-secondary text-xs disabled:cursor-wait disabled:opacity-70"
               >
-                {!isNarrating ? 'Escuchar Laudes con voz IA' : isNarrationPaused ? 'Reanudar voz IA' : 'Pausar voz IA'}
+                {!isNarrating
+                  ? 'Escuchar Laudes · voz española'
+                  : isVoiceLoading
+                    ? 'Preparando voz…'
+                    : isNarrationPaused
+                      ? 'Reanudar voz'
+                      : 'Pausar voz'}
               </button>
               {isNarrating && (
                 <button onClick={stopNarration} className="laudia-btn-ghost text-xs">
@@ -621,6 +647,7 @@ export default function PrayPage() {
                 Volver a modo guía
               </button>
             </div>
+            <p className="mt-2 text-[11px] text-stone-400">Deepgram · Néstor · español de España</p>
             {voiceError && <p className="mt-2 text-xs text-amber-700">{voiceError}</p>}
           </div>
 
@@ -858,15 +885,23 @@ export default function PrayPage() {
                     ? resumeNarration
                     : pauseNarration
               }
-              className="laudia-btn-secondary text-sm"
+              disabled={isVoiceLoading}
+              className="laudia-btn-secondary text-sm disabled:cursor-wait disabled:opacity-70"
             >
-              {!isNarrating ? 'Escuchar todo el rezo con voz IA' : isNarrationPaused ? 'Reanudar voz IA' : 'Pausar voz IA'}
+              {!isNarrating
+                ? 'Escuchar todo · voz española'
+                : isVoiceLoading
+                  ? 'Preparando voz…'
+                  : isNarrationPaused
+                    ? 'Reanudar voz'
+                    : 'Pausar voz'}
             </button>
             {isNarrating && (
               <button onClick={stopNarration} className="laudia-btn-ghost text-xs ml-2">
                 Detener y reiniciar
               </button>
             )}
+            <p className="mt-2 text-[11px] text-stone-400">Deepgram · Néstor · español de España</p>
             {voiceError && <p className="mt-2 text-xs text-amber-700">{voiceError}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
