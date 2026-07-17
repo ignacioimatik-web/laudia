@@ -366,7 +366,7 @@ function SeasonTimeline({ season, selectedCycle }: { season: SeasonData; selecte
       <div className="px-4 md:px-5 pb-3.5 space-y-0.5">
         {active.links.map((link, i) => (
           <a
-            key={link.url}
+            key={`${link.url}-${i}`}
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
