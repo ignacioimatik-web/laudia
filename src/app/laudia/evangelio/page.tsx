@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { fetchDailyGospel } from '@/lib/laudia/gospel-source';
 
 type GospelState = {
@@ -15,7 +16,13 @@ function toLocalDateInput(date: Date): string {
 }
 
 export default function EvangelioPage() {
-  const [selectedDate, setSelectedDate] = useState(() => toLocalDateInput(new Date()));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const requested = searchParams.get('date');
+    return requested && /^\d{4}-\d{2}-\d{2}$/.test(requested)
+      ? requested
+      : toLocalDateInput(new Date());
+  });
   const [data, setData] = useState<GospelState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +80,11 @@ export default function EvangelioPage() {
               <input
                 type="date"
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => {
+                  const nextDate = e.target.value;
+                  setSelectedDate(nextDate);
+                  setSearchParams(nextDate ? { date: nextDate } : {});
+                }}
                 className="ml-2 rounded-lg border border-stone-300 bg-white/70 px-2 py-1 text-sm text-stone-700"
               />
             </label>

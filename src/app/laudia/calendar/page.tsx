@@ -34,6 +34,13 @@ const MONTHS = [
 
 const WEEKDAYS = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá'];
 
+function toLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function getSeasonLabel(season: string): string {
   const labels: Record<string, string> = {
     ADVENTO: 'Adviento', NAVIDAD: 'Navidad', TIEMPO_ORDINARIO_1: 'Tiempo Ordinario',
@@ -75,9 +82,7 @@ export default function CalendarPage() {
 
   const [displayYear, setDisplayYear] = useState(today.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(today.getMonth());
-  const [selectedDate, setSelectedDate] = useState<string>(
-    today.toISOString().split('T')[0]
-  );
+  const [selectedDate, setSelectedDate] = useState<string>(toLocalDateKey(today));
 
   const monthCalendar = useMemo(
     () => getMonthCalendar(displayYear, displayMonth),
@@ -115,7 +120,7 @@ export default function CalendarPage() {
   const goToday = useCallback(() => {
     setDisplayYear(today.getFullYear());
     setDisplayMonth(today.getMonth());
-    setSelectedDate(today.toISOString().split('T')[0]);
+    setSelectedDate(toLocalDateKey(today));
   }, [today]);
 
   const selectDay = useCallback((date: string) => {
@@ -128,7 +133,7 @@ export default function CalendarPage() {
     navigate(selectedDate ? `/laudia/pray?date=${selectedDate}` : '/laudia/pray');
   }, [navigate, selectedDate]);
 
-  const isToday = (date: string) => date === today.toISOString().split('T')[0];
+  const isToday = (date: string) => date === toLocalDateKey(today);
 
   // ── Render ──────────────────────────────────────────────────────────────
 

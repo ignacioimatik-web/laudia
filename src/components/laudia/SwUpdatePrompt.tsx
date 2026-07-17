@@ -21,7 +21,7 @@ export function SwUpdatePrompt() {
         <div className="flex items-center gap-2 shrink-0">
           {needRefresh && (
             <button
-              onClick={updateServiceWorker}
+              onClick={() => updateServiceWorker(true)}
               className="laudia-btn-primary text-xs !px-3 !py-1.5"
             >
               Actualizar

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useLaudiaPreferences, VisualMode, DefaultMode, PrayerType } from '@/hooks/laudia/useLaudiaPreferences';
 
 // ── Small building blocks ──────────────────────────────────────────────────
@@ -87,42 +87,6 @@ function FontSizeControl({ value, onChange }: { value: number; onChange: (v: num
 export default function SettingsPage() {
   const { preferences, updatePreference, resetPreferences, loaded } = useLaudiaPreferences();
 
-  // Apply visual mode to <html> so other pages also react
-  useEffect(() => {
-    if (!loaded) return;
-    const root = document.documentElement;
-    root.setAttribute('data-visual-mode', preferences.visualMode);
-    // For dark mode toggle a class on <html>; for dawn add a class too
-    root.classList.toggle('dark', preferences.visualMode === 'dark');
-    root.classList.toggle('dawn', preferences.visualMode === 'dawn');
-    root.classList.toggle('light-mode', preferences.visualMode === 'light');
-  }, [preferences.visualMode, loaded]);
-
-  // Apply font size via CSS custom property
-  useEffect(() => {
-    if (!loaded) return;
-    document.documentElement.style.setProperty('--laudia-font-size', `${preferences.fontSize}px`);
-  }, [preferences.fontSize, loaded]);
-
-  // Apply keepScreenActive if the Screen Wake Lock API is available
-  useEffect(() => {
-    if (!loaded) return;
-    if (!preferences.keepScreenActive) {
-      if ((window as any).__wakeLock) {
-        (window as any).__wakeLock.release().catch(() => {});
-        (window as any).__wakeLock = null;
-      }
-      return;
-    }
-    if ('wakeLock' in navigator) {
-      (navigator as any).wakeLock.request('screen').then((lock: any) => {
-        (window as any).__wakeLock = lock;
-      }).catch(() => {
-        // not available or denied
-      });
-    }
-  }, [preferences.keepScreenActive, loaded]);
-
   if (!loaded) {
     return (
       <div className="min-h-screen flex items-center justify-center laudia-gradient">
@@ -202,14 +166,14 @@ export default function SettingsPage() {
 
           <div className="laudia-card p-5">
             <SectionTitle>Funcionalidades</SectionTitle>
-            <SettingRow label="Recordatorio matutino" description="Aviso diario a la hora de Laudes">
-              <Toggle value={p.enableMorningReminder} onChange={(v) => updatePreference('enableMorningReminder', v)} />
+            <SettingRow label="Recordatorio matutino" description="Requerirá notificaciones push en una próxima versión">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Próximamente</span>
             </SettingRow>
             <SettingRow label="Mantener pantalla activa" description="Evita que la pantalla se apague mientras rezas">
               <Toggle value={p.keepScreenActive} onChange={(v) => updatePreference('keepScreenActive', v)} />
             </SettingRow>
-            <SettingRow label="Contenido offline" description="Almacenar textos para rezar sin conexión">
-              <Toggle value={p.enableOffline} onChange={(v) => updatePreference('enableOffline', v)} />
+            <SettingRow label="Contenido offline" description="La PWA guarda automáticamente la aplicación y los recursos disponibles">
+              <span className="text-xs font-medium text-emerald-700">Automático</span>
             </SettingRow>
           </div>
 

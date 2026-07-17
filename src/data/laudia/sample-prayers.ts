@@ -1,4 +1,10 @@
-import { LaudsOffice, PrayerMode } from '@/types/laudia';
+import type {
+  LaudsOffice,
+  OfficeSource,
+  PrayerBlock,
+  PrayerMode,
+  PrayerSection,
+} from '@/types/laudia';
 import { getLiturgicalDay } from '@/lib/laudia/liturgical-calendar';
 
 /**
