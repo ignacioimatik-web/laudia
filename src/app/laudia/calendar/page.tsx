@@ -300,6 +300,19 @@ export default function CalendarPage() {
                     <p className="laudia-h2">{getWeekdayName(selectedDate!)}</p>
                   </div>
 
+                  <DeepgramNarrator
+                    text={[
+                      getWeekdayName(selectedDate),
+                      selectedDayLiturgical.title,
+                      rankLabels[selectedDayLiturgical.rank],
+                      getSeasonLabel(selectedDayLiturgical.season),
+                      `Color litúrgico ${getColorLabel(selectedDayLiturgical.color)}`,
+                      `Salterio, semana ${selectedDayLiturgical.psalterWeek}`,
+                    ].join('. ')}
+                    label="Escuchar el día"
+                    compact
+                  />
+
                   {/* Celebration */}
                   <div className="space-y-2">
                     <p className="laudia-h3">Celebración</p>
@@ -341,19 +354,6 @@ export default function CalendarPage() {
                       </span>
                     </div>
                   )}
-
-                  <DeepgramNarrator
-                    text={[
-                      getWeekdayName(selectedDate),
-                      selectedDayLiturgical.title,
-                      rankLabels[selectedDayLiturgical.rank],
-                      getSeasonLabel(selectedDayLiturgical.season),
-                      `Color litúrgico ${getColorLabel(selectedDayLiturgical.color)}`,
-                      `Salterio, semana ${selectedDayLiturgical.psalterWeek}`,
-                    ].join('. ')}
-                    label="Escuchar el día"
-                    compact
-                  />
 
                   {/* Action */}
                   <div className="pt-4 border-t border-stone-100">
