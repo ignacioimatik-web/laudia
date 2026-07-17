@@ -820,6 +820,38 @@ export default function PrayPage() {
           <h2 className="laudia-h1 mt-0.5">{step.title}</h2>
         </div>
 
+        {/* Voice controls — before the prayer text */}
+        <div className="mb-5 text-center">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <button
+              onClick={
+                !isNarrating
+                  ? startNarration
+                  : isNarrationPaused
+                    ? resumeNarration
+                    : pauseNarration
+              }
+              disabled={isVoiceLoading}
+              className="laudia-btn-secondary text-sm disabled:cursor-wait disabled:opacity-70"
+            >
+              {!isNarrating
+                ? 'Escuchar todo · voz española'
+                : isVoiceLoading
+                  ? 'Preparando voz…'
+                  : isNarrationPaused
+                    ? 'Reanudar voz'
+                    : 'Pausar voz'}
+            </button>
+            {isNarrating && (
+              <button onClick={stopNarration} className="laudia-btn-ghost text-xs">
+                Detener y reiniciar
+              </button>
+            )}
+          </div>
+          <p className="mt-2 text-[11px] text-stone-400">Deepgram · Agustina · voz femenina de España</p>
+          {voiceError && <p className="mt-2 text-xs text-amber-700">{voiceError}</p>}
+        </div>
+
         {/* Step content */}
         <div className="flex-1 overflow-y-auto">
           <div className="laudia-card p-5 md:p-6 animate-fade-in">
@@ -881,34 +913,6 @@ export default function PrayPage() {
 
         {/* Navigation */}
         <div className="mt-6 space-y-3">
-          <div className="text-center">
-            <button
-              onClick={
-                !isNarrating
-                  ? startNarration
-                  : isNarrationPaused
-                    ? resumeNarration
-                    : pauseNarration
-              }
-              disabled={isVoiceLoading}
-              className="laudia-btn-secondary text-sm disabled:cursor-wait disabled:opacity-70"
-            >
-              {!isNarrating
-                ? 'Escuchar todo · voz española'
-                : isVoiceLoading
-                  ? 'Preparando voz…'
-                  : isNarrationPaused
-                    ? 'Reanudar voz'
-                    : 'Pausar voz'}
-            </button>
-            {isNarrating && (
-              <button onClick={stopNarration} className="laudia-btn-ghost text-xs ml-2">
-                Detener y reiniciar
-              </button>
-            )}
-            <p className="mt-2 text-[11px] text-stone-400">Deepgram · Agustina · voz femenina de España</p>
-            {voiceError && <p className="mt-2 text-xs text-amber-700">{voiceError}</p>}
-          </div>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={goPrev}

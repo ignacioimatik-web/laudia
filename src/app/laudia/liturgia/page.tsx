@@ -411,11 +411,11 @@ export default function LiturgiaPage() {
             </svg>
             <h1 className="text-xl font-bold text-stone-800">Liturgia en español</h1>
           </div>
+          <DeepgramNarrator text={narrationText} label="Escuchar guía" compact />
           <p className="text-sm text-stone-500 leading-relaxed">
             Recorrido por las lecturas dominicales y festivas en orden cronológico del año litúrgico.
             Fuente oficial de la Conferencia Episcopal Española.
           </p>
-          <DeepgramNarrator text={narrationText} label="Escuchar guía" compact />
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-stone-500 font-medium mr-1">Ciclo:</span>
