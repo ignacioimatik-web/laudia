@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { DeepgramNarrator } from '@/components/laudia/DeepgramNarrator';
 
 // ── Icons (inline SVGs, sobrios) ───────────────────────────────────────────
 
@@ -304,6 +305,8 @@ const sections: Section[] = [
 // ── Accordion Item Component ──────────────────────────────────────────────
 
 function SectionCard({ section, isOpen, onToggle }: { section: Section; isOpen: boolean; onToggle: () => void }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="laudia-card overflow-hidden transition-all duration-300">
       <button
@@ -326,7 +329,13 @@ function SectionCard({ section, isOpen, onToggle }: { section: Section; isOpen: 
         className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}
       >
         <div className="px-4 md:px-5 pb-5">
-          {section.content}
+          <DeepgramNarrator
+            text={() => `${section.title}. ${contentRef.current?.innerText ?? ''}`}
+            label="Escuchar artículo"
+            compact
+            className="mb-4"
+          />
+          <div ref={contentRef}>{section.content}</div>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchDailyGospel } from '@/lib/laudia/gospel-source';
+import { DeepgramNarrator } from '@/components/laudia/DeepgramNarrator';
 
 type GospelState = {
   liturgicalTitle: string;
@@ -116,6 +117,10 @@ export default function EvangelioPage() {
             <p className="laudia-h3">Fuente: Evangelizo (SP)</p>
             <p className="text-sm text-stone-600">{data.liturgicalTitle}</p>
             <h2 className="laudia-h2">{data.readingTitle}</h2>
+            <DeepgramNarrator
+              text={`${data.liturgicalTitle}. ${data.readingTitle}. ${data.text}`}
+              label="Escuchar Evangelio"
+            />
             <div className="laudia-separator" />
             <p className="laudia-prayer laudia-prose whitespace-pre-line text-stone-800 leading-relaxed">
               {data.text}
