@@ -287,7 +287,7 @@ function buildNarrationText(steps: PrayStep[]): string {
     .join('\n\n');
 }
 
-function splitForSpeech(text: string, maxChunk = 1_800): string[] {
+function splitForSpeech(text: string, maxChunk = 600): string[] {
   const normalized = text.replace(/\s+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   if (normalized.length <= maxChunk) return [normalized];
 

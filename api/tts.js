@@ -73,7 +73,7 @@ module.exports = async function handler(request, response) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25_000);
+  const timeout = setTimeout(() => controller.abort(), 45_000);
 
   try {
     const url = new URL('https://api.deepgram.com/v1/speak');
