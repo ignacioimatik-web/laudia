@@ -8,6 +8,7 @@ import LibraryPage from './app/laudia/library/page';
 import LiturgiaPage from './app/laudia/liturgia/page';
 import SettingsPage from './app/laudia/settings/page';
 import MorePage from './app/laudia/more/page';
+import LandingPage from './app/landing/page';
 import { SwUpdatePrompt } from './components/laudia/SwUpdatePrompt';
 import { PreferenceEffects } from './components/laudia/PreferenceEffects';
 
@@ -29,7 +30,7 @@ function App() {
             <Route path="liturgia" element={<LiturgiaPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
-          <Route path="/" element={<Navigate to="/laudia/today" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="*" element={<Navigate to="/laudia/today" replace />} />
         </Routes>
       </div>

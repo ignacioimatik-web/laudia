@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMonthCalendar, getLiturgicalDay } from '@/lib/laudia/liturgical-calendar';
 import { CalendarDay, LiturgicalDay, LiturgicalColor, LiturgicalRank } from '@/types/laudia';
 import LiturgicalBadge from '@/components/laudia/LiturgicalBadge';
+import { DeepgramNarrator } from '@/components/laudia/DeepgramNarrator';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -340,6 +341,19 @@ export default function CalendarPage() {
                       </span>
                     </div>
                   )}
+
+                  <DeepgramNarrator
+                    text={[
+                      getWeekdayName(selectedDate),
+                      selectedDayLiturgical.title,
+                      rankLabels[selectedDayLiturgical.rank],
+                      getSeasonLabel(selectedDayLiturgical.season),
+                      `Color litúrgico ${getColorLabel(selectedDayLiturgical.color)}`,
+                      `Salterio, semana ${selectedDayLiturgical.psalterWeek}`,
+                    ].join('. ')}
+                    label="Escuchar el día"
+                    compact
+                  />
 
                   {/* Action */}
                   <div className="pt-4 border-t border-stone-100">

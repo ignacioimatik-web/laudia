@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { DeepgramNarrator } from '@/components/laudia/DeepgramNarrator';
 
 interface PdfLink {
   label: string;
@@ -387,6 +388,17 @@ function SeasonTimeline({ season, selectedCycle }: { season: SeasonData; selecte
 export default function LiturgiaPage() {
   const currentCycle = getCurrentCycle();
   const [selectedCycle, setSelectedCycle] = useState(currentCycle);
+  const narrationText = useMemo(() => {
+    const cycleSections = [...seasons, solemnidades]
+      .map((season) => {
+        const cycle = season.cycles.find((item) => item.cycle === selectedCycle);
+        if (!cycle) return '';
+        return `${season.title}, ${season.period}. ${cycle.links.map((link) => link.label).join('. ')}`;
+      })
+      .filter(Boolean)
+      .join('. ');
+    return `Guía de liturgia en español. Ciclo ${selectedCycle}. ${cycleSections}. Santoral. ${santoralLinks.map((link) => link.label).join('. ')}`;
+  }, [selectedCycle]);
 
   return (
     <div className="min-h-screen laudia-gradient">
@@ -403,6 +415,7 @@ export default function LiturgiaPage() {
             Recorrido por las lecturas dominicales y festivas en orden cronológico del año litúrgico.
             Fuente oficial de la Conferencia Episcopal Española.
           </p>
+          <DeepgramNarrator text={narrationText} label="Escuchar guía" compact />
 
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-stone-500 font-medium mr-1">Ciclo:</span>
