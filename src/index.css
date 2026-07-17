@@ -863,3 +863,318 @@ html.dark .laudia-tab.is-active { color: #f4ede5; background: rgba(255,255,255,.
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LaudIA Nordic — navigation-led visual system
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --laudia-bg: #eef1ed;
+  --laudia-bg-card: rgba(251, 252, 249, 0.88);
+  --laudia-text: #24302b;
+  --laudia-text-soft: #68736d;
+  --laudia-text-muted: #8d9891;
+  --laudia-accent: #60776c;
+  --laudia-accent-bg: #e2e9e4;
+  --laudia-accent-border: #bdcbc2;
+  --laudia-border: rgba(70, 89, 80, 0.2);
+  --laudia-border-light: rgba(70, 89, 80, 0.11);
+  --laudia-shadow-card: 0 14px 34px rgba(44, 61, 52, 0.07);
+  --laudia-shadow-elevated: 0 22px 50px rgba(44, 61, 52, 0.11);
+  --laudia-radius-card: 22px;
+  --laudia-radius-sm: 13px;
+}
+
+html { background: #e8ece7; }
+body { background: #eef1ed; }
+
+.laudia-app-shell {
+  background:
+    radial-gradient(circle at 8% -5%, rgba(255, 255, 255, 0.88), transparent 28rem),
+    radial-gradient(circle at 95% 15%, rgba(175, 195, 184, 0.18), transparent 32rem),
+    linear-gradient(180deg, #f4f6f2 0%, #e9ede8 100%);
+  color: var(--laudia-text);
+}
+
+.laudia-topbar {
+  border-color: rgba(62, 80, 71, 0.09);
+  background: rgba(246, 248, 244, 0.9);
+}
+
+.laudia-brand-mark {
+  background: #5e766b;
+  box-shadow: 0 7px 18px rgba(63, 86, 75, 0.22);
+}
+
+.laudia-brand-mark::before,
+.laudia-brand-mark::after,
+.laudia-brand-mark > span::before,
+.laudia-brand-mark > span::after { background: #f3f6f2; }
+
+.laudia-topbar-back {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  color: #617067;
+  background: rgba(255, 255, 255, 0.62);
+  font: 700 0.68rem/1 var(--laudia-font-sans);
+}
+
+.laudia-desktop-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.48rem;
+  padding: 0.38rem 0.78rem 0.38rem 0.42rem;
+  color: #6a756f;
+}
+
+.laudia-desktop-link img {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  object-fit: cover;
+  filter: saturate(0.72);
+}
+
+.laudia-desktop-link.is-active {
+  color: #f8faf7;
+  background: #35443d;
+  box-shadow: 0 9px 22px rgba(45, 63, 54, 0.18);
+}
+
+.laudia-desktop-link.is-active img { filter: saturate(0.95); }
+
+.laudia-route-guide {
+  border-bottom: 1px solid rgba(65, 85, 75, 0.08);
+  background: rgba(241, 244, 239, 0.62);
+}
+
+.laudia-route-guide-inner {
+  display: flex;
+  min-height: 86px;
+  align-items: center;
+  gap: 0.85rem;
+  padding-block: 0.65rem;
+}
+
+.laudia-route-guide-inner > img {
+  width: 66px;
+  height: 62px;
+  flex: none;
+  border-radius: 18px;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(44, 61, 52, 0.12);
+  filter: saturate(0.76) contrast(0.96);
+}
+
+.laudia-route-guide-inner span {
+  display: block;
+  color: #89948e;
+  font: 700 0.58rem/1.1 var(--laudia-font-sans);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.laudia-route-guide-inner strong {
+  display: block;
+  margin-top: 0.15rem;
+  color: #27342e;
+  font: 650 1rem/1.15 var(--laudia-font-sans);
+  letter-spacing: -0.02em;
+}
+
+.laudia-route-guide-inner p {
+  overflow: hidden;
+  margin-top: 0.15rem;
+  color: #718078;
+  font: 500 0.7rem/1.25 var(--laudia-font-sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.laudia-route-guide-action {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  border: 1px solid rgba(65, 85, 75, 0.12);
+  border-radius: 999px;
+  padding: 0.55rem 0.75rem;
+  color: #53665d;
+  background: rgba(255, 255, 255, 0.65);
+  font: 700 0.65rem/1 var(--laudia-font-sans);
+  white-space: nowrap;
+}
+
+.laudia-tabbar {
+  padding: 0.42rem 0.6rem max(0.45rem, env(safe-area-inset-bottom, 0.45rem));
+  border-color: rgba(58, 77, 67, 0.13);
+  background: rgba(247, 249, 246, 0.94);
+  box-shadow: 0 -16px 38px rgba(44, 61, 52, 0.08);
+}
+
+.laudia-tab {
+  min-height: 58px;
+  gap: 3px;
+  color: #849087;
+  font-size: 0.62rem;
+}
+
+.laudia-tab::before { display: none; }
+
+.laudia-tab-image {
+  display: block;
+  width: 31px;
+  height: 31px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 11px;
+  box-shadow: 0 4px 11px rgba(41, 58, 49, 0.11);
+  transition: 180ms ease;
+}
+
+.laudia-tab-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.25) saturate(0.62);
+}
+
+.laudia-tab.is-active {
+  color: #304239;
+  background: #e1e8e3;
+}
+
+.laudia-tab.is-active .laudia-tab-image {
+  transform: translateY(-2px) scale(1.08);
+  border-color: #f8faf7;
+  box-shadow: 0 7px 15px rgba(41, 58, 49, 0.16);
+}
+
+.laudia-tab.is-active .laudia-tab-image img { filter: saturate(0.95); }
+
+.laudia-card,
+.laudia-card-elevated,
+.laudia-quick-card,
+.laudia-destination-card {
+  border-color: rgba(65, 85, 75, 0.11);
+  background: rgba(251, 252, 249, 0.86);
+  box-shadow: var(--laudia-shadow-card);
+}
+
+.laudia-gradient {
+  background:
+    radial-gradient(900px 520px at 100% -5%, rgba(182, 201, 190, 0.25), transparent 60%),
+    radial-gradient(620px 400px at 0% 12%, rgba(255, 255, 255, 0.72), transparent 58%),
+    linear-gradient(165deg, #f3f5f1 0%, #e8ece7 100%);
+}
+
+.laudia-btn-primary,
+.laudia-action-primary {
+  background: linear-gradient(145deg, #405349, #2f4038);
+  box-shadow: 0 12px 26px rgba(45, 63, 54, 0.2);
+}
+
+.laudia-kicker { color: #71877b; }
+.laudia-display { color: #233129; }
+.laudia-page { min-height: calc(100vh - 142px); }
+
+.laudia-app-shell main > .min-h-screen {
+  padding-bottom: calc(6.4rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.laudia-destination-card {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto;
+  min-height: 144px;
+  align-items: center;
+  padding: 0.7rem;
+}
+
+.laudia-destination-picture {
+  position: relative;
+  display: block;
+  width: 92px;
+  height: 118px;
+  overflow: hidden;
+  border-radius: 17px;
+  background: #e6ebe6;
+}
+
+.laudia-destination-picture > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.72);
+  transition: transform 260ms ease;
+}
+
+.laudia-destination-card:hover .laudia-destination-picture > img { transform: scale(1.035); }
+
+.laudia-destination-picture .laudia-destination-icon {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 11px;
+  box-shadow: 0 5px 13px rgba(38, 52, 45, 0.16);
+}
+
+.laudia-destination-picture .laudia-destination-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (min-width: 768px) {
+  .laudia-route-guide-inner {
+    min-height: 96px;
+    gap: 1rem;
+  }
+
+  .laudia-route-guide-inner > img {
+    width: 76px;
+    height: 70px;
+  }
+
+  .laudia-route-guide-inner strong { font-size: 1.08rem; }
+
+  .laudia-app-shell main > .min-h-screen {
+    padding-bottom: 3.5rem !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .laudia-route-guide-action {
+    width: 40px;
+    justify-content: center;
+    padding-inline: 0;
+    font-size: 0;
+  }
+
+  .laudia-route-guide-action span {
+    color: #53665d;
+    font-size: 0.8rem;
+  }
+}
+
+html.dark .laudia-route-guide {
+  background: rgba(34, 43, 38, 0.86);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+html.dark .laudia-route-guide-inner strong { color: #e6ece7; }
+
+html.dark .laudia-route-guide-inner p,
+html.dark .laudia-route-guide-inner span { color: #99a69e; }
+
+html.dark .laudia-route-guide-action {
+  color: #d6ded8;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.1);
+}
