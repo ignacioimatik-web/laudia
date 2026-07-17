@@ -1,28 +1,11 @@
-declare const process: {
-  env: Record<string, string | undefined>;
-};
-
-type TtsRequest = {
-  method?: string;
-  body?: unknown;
-  headers?: Record<string, string | string[] | undefined>;
-};
-
-type TtsResponse = {
-  status(code: number): TtsResponse;
-  setHeader(name: string, value: string): void;
-  json(body: unknown): void;
-  end(body?: Uint8Array): void;
-};
-
 const MAX_TEXT_LENGTH = 1_900;
 const DEEPGRAM_MODEL = 'aura-2-nestor-es';
 const DEEPGRAM_SPEED = '0.92';
 
-function parseText(body: unknown): string {
+function parseText(body) {
   if (typeof body === 'string') {
     try {
-      const parsed = JSON.parse(body) as { text?: unknown };
+      const parsed = JSON.parse(body);
       return typeof parsed.text === 'string' ? parsed.text.trim() : '';
     } catch {
       return '';
@@ -30,19 +13,18 @@ function parseText(body: unknown): string {
   }
 
   if (body && typeof body === 'object' && 'text' in body) {
-    const text = (body as { text?: unknown }).text;
-    return typeof text === 'string' ? text.trim() : '';
+    return typeof body.text === 'string' ? body.text.trim() : '';
   }
 
   return '';
 }
 
-function getHeader(request: TtsRequest, name: string): string {
+function getHeader(request, name) {
   const value = request.headers?.[name] ?? request.headers?.[name.toLowerCase()];
   return Array.isArray(value) ? value[0] ?? '' : value ?? '';
 }
 
-function isSameOriginRequest(request: TtsRequest): boolean {
+function isSameOriginRequest(request) {
   const origin = getHeader(request, 'origin');
   const host = getHeader(request, 'host');
   const fetchSite = getHeader(request, 'sec-fetch-site');
@@ -57,7 +39,7 @@ function isSameOriginRequest(request: TtsRequest): boolean {
   }
 }
 
-export default async function handler(request: TtsRequest, response: TtsResponse) {
+module.exports = async function handler(request, response) {
   response.setHeader('Cache-Control', 'private, no-store, max-age=0');
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('X-Robots-Tag', 'noindex, nofollow');
@@ -120,7 +102,7 @@ export default async function handler(request: TtsRequest, response: TtsResponse
       return;
     }
 
-    const audio = new Uint8Array(await deepgramResponse.arrayBuffer());
+    const audio = Buffer.from(await deepgramResponse.arrayBuffer());
     if (audio.byteLength === 0) {
       response.status(502).json({ error: 'El servicio de voz devolvió un audio vacío.' });
       return;
@@ -138,4 +120,4 @@ export default async function handler(request: TtsRequest, response: TtsResponse
   } finally {
     clearTimeout(timeout);
   }
-}
+};
