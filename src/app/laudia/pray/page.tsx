@@ -652,7 +652,7 @@ export default function PrayPage() {
                 Volver a modo guía
               </button>
             </div>
-            <p className="mt-2 text-[11px] text-stone-400">Deepgram · Néstor · español de España</p>
+            <p className="mt-2 text-[11px] text-stone-400">Deepgram · Agustina · voz femenina de España</p>
             {voiceError && <p className="mt-2 text-xs text-amber-700">{voiceError}</p>}
           </div>
 
@@ -906,7 +906,7 @@ export default function PrayPage() {
                 Detener y reiniciar
               </button>
             )}
-            <p className="mt-2 text-[11px] text-stone-400">Deepgram · Néstor · español de España</p>
+            <p className="mt-2 text-[11px] text-stone-400">Deepgram · Agustina · voz femenina de España</p>
             {voiceError && <p className="mt-2 text-xs text-amber-700">{voiceError}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
