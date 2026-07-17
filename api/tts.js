@@ -1,6 +1,6 @@
 const MAX_TEXT_LENGTH = 1_900;
 const DEEPGRAM_MODEL = 'aura-2-agustina-es';
-const DEEPGRAM_SPEED = '0.92';
+const DEEPGRAM_SPEED = '1.20';
 
 function parseText(body) {
   if (typeof body === 'string') {
