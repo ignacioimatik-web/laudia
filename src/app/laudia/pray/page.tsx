@@ -636,7 +636,7 @@ export default function PrayPage() {
                     {block.rubrics && (
                       <p className="rubric mb-1">{block.rubrics}</p>
                     )}
-                    {block.type !== 'TEXT' && block.type !== 'PSALM' && (
+                    {block.type !== 'PSALM' && (
                       <p className="text-[11px] font-medium text-stone-400 uppercase tracking-wider mb-1">
                         {blockLabels[block.type] || block.type}
                       </p>
@@ -794,15 +794,13 @@ export default function PrayPage() {
             {step.blocks.map((block, bi) => (
               <div key={block.id} className={bi > 0 ? 'pt-5 mt-5 border-t border-stone-100' : ''}>
                 {/* Block type label */}
-                {block.type !== 'TEXT' && (
-                  <p className="text-[11px] font-medium text-stone-400 uppercase tracking-wider mb-1.5">
-                    {block.type === 'PSALM' && block.psalmInfo
-                      ? `Salmo ${block.psalmInfo.number}${block.psalmInfo.verses ? ` (${block.psalmInfo.verses})` : ''}`
-                      : block.type === 'CANTICLE_GOSPEL' && block.canticleInfo
-                      ? block.canticleInfo.name
-                      : blockLabels[block.type] || block.type}
-                  </p>
-                )}
+                <p className="text-[11px] font-medium text-stone-400 uppercase tracking-wider mb-1.5">
+                  {block.type === 'PSALM' && block.psalmInfo
+                    ? `Salmo ${block.psalmInfo.number}${block.psalmInfo.verses ? ` (${block.psalmInfo.verses})` : ''}`
+                    : block.type === 'CANTICLE_GOSPEL' && block.canticleInfo
+                    ? block.canticleInfo.name
+                    : blockLabels[block.type] || block.type}
+                </p>
 
                 {/* Rubric */}
                 {block.rubrics && bi === 0 && (

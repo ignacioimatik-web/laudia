@@ -1,8 +1,8 @@
 import React from 'react';
-import { PrayerBlock, AiReflection } from '@/types/laudia';
+import type { PrayerBlock as PrayerBlockData } from '@/types/laudia';
 
 type PrayerBlockProps = {
-  block: PrayerBlock;
+  block: PrayerBlockData;
   showRubrics: boolean;
   readingMode: boolean;
   textSizeClass: string;
@@ -38,7 +38,7 @@ export default function PrayerBlock({ block, showRubrics, readingMode, textSizeC
       {/* Reflexión de IA si modo guía y existe (not implemented in today page but kept for completeness) */}
       {false && block.aiReflection && (
         <div className="mt-3 p-3 bg-amber-50 border-l-4 border-amber-400">
-          <p className="text-sm text-amber-800">{block.aiReflection.content}</p>
+          <p className="text-sm text-amber-800">{block.aiReflection?.content}</p>
         </div>
       )}
     </div>

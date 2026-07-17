@@ -65,7 +65,12 @@ function parsePsalmodyBlocks(psalmody: string): PrayerBlock[] {
     const end = index + 1 < headingMatches.length
       ? (headingMatches[index + 1].index ?? psalmody.length)
       : psalmody.length;
-    const chunk = psalmody.slice(start, end).trim();
+    const chunk = psalmody
+      .slice(start, end)
+      // La antífona siguiente aparece antes del próximo encabezado. Se
+      // representa como bloque propio y no debe quedar duplicada al final.
+      .replace(/\nAnt\s*\d?\.\s*[\s\S]*$/i, '')
+      .trim();
 
     const antiphonText = antiphons[antiphonIndex] ?? null;
     if (antiphonText) {
@@ -138,9 +143,14 @@ function buildSectionsFromText(text: string): PrayerSection[] | null {
   const responsory = extractSection(body, /RESPONSORIO BREVE/i, /C[AÁ]NTICO EVANG[EÉ]LICO/i);
   const benedictus = extractSection(body, /C[AÁ]NTICO EVANG[EÉ]LICO/i, /PRECES/i);
   const intercessions = extractSection(body, /PRECES/i, /Padre nuestro/i);
-  const ourFather = extractSection(body, /Padre nuestro/i, /ORACI[OÓ]N|ORACION/i);
-  const concludingPrayer = extractSection(body, /ORACI[OÓ]N|ORACION/i, /CONCLUSI[OÓ]N|CONCLUSION/i);
-  const conclusion = extractSection(body, /CONCLUSI[OÓ]N|CONCLUSION/i);
+  // Los encabezados se anclan a una línea completa. El patrón anterior
+  // también encontraba "Oración de la mañana" en el título de la página y
+  // terminaba copiando casi todo el oficio dentro de la oración final.
+  const prayerHeading = /(?:^|\n)ORACI[OÓ]N\s*(?:\n|$)/im;
+  const conclusionHeading = /(?:^|\n)CONCLUSI[OÓ]N\s*(?:\n|$)/im;
+  const ourFather = extractSection(body, /Padre nuestro/i, prayerHeading);
+  const concludingPrayer = extractSection(body, prayerHeading, conclusionHeading);
+  const conclusion = extractSection(body, conclusionHeading);
 
   if (!opening || !hymn || !psalmody || !reading || !responsory || !benedictus || !intercessions || !ourFather || !concludingPrayer || !conclusion) {
     return null;

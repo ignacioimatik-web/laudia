@@ -7,12 +7,15 @@ import EvangelioPage from './app/laudia/evangelio/page';
 import LibraryPage from './app/laudia/library/page';
 import LiturgiaPage from './app/laudia/liturgia/page';
 import SettingsPage from './app/laudia/settings/page';
+import MorePage from './app/laudia/more/page';
 import { SwUpdatePrompt } from './components/laudia/SwUpdatePrompt';
+import { PreferenceEffects } from './components/laudia/PreferenceEffects';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen">
+        <PreferenceEffects />
         <SwUpdatePrompt />
         <Routes>
           <Route path="/laudia" element={<LaudiaPage />}>
@@ -20,6 +23,7 @@ function App() {
             <Route path="today" element={<TodayPage />} />
             <Route path="pray" element={<PrayPage />} />
             <Route path="calendar" element={<CalendarPage />} />
+            <Route path="more" element={<MorePage />} />
             <Route path="evangelio" element={<EvangelioPage />} />
             <Route path="library" element={<LibraryPage />} />
             <Route path="liturgia" element={<LiturgiaPage />} />

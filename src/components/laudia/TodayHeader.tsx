@@ -1,5 +1,5 @@
 import { LiturgicalDay } from '@/types/laudia';
-import LiturgicalBadge from './LiturgicalBadge';
+import LiturgicalBadge, { type LiturgicalBadgeProps } from './LiturgicalBadge';
 
 type TodayHeaderProps = {
   office: {

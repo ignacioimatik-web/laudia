@@ -1,164 +1,180 @@
-import TodayHeader from '@/components/laudia/TodayHeader';
-import { LaudsOffice, PrayerSection, PrayerBlock } from '@/types/laudia';
-import { buildLaudsOfficeFromOfficialSource } from '@/lib/laudia/official-source';
-import { VerificationNotice } from '@/components/laudia/VerificationNotice';
-import FontSizeControls from '@/components/laudia/FontSizeControls';
-import ReadingModeToggle from '@/components/laudia/ReadingModeToggle';
-import { LiturgicalValidatorPanel } from '@/components/laudia/LiturgicalValidatorPanel';
-import { validateOffice } from '@/lib/laudia/liturgical-validator';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { buildLaudsOfficeFromOfficialSource } from '@/lib/laudia/official-source';
+import type { LaudsOffice } from '@/types/laudia';
+
+const seasonLabels: Record<string, string> = {
+  ADVENTO: 'Adviento',
+  NAVIDAD: 'Navidad',
+  TIEMPO_ORDINARIO_1: 'Tiempo Ordinario',
+  CUARESMA: 'Cuaresma',
+  TRIDUO_PASCUAL: 'Triduo Pascual',
+  PASCUA: 'Pascua',
+  TIEMPO_ORDINARIO_2: 'Tiempo Ordinario',
+};
+
+const colorNames: Record<string, string> = {
+  WHITE: 'Blanco',
+  RED: 'Rojo',
+  GREEN: 'Verde',
+  VIOLET: 'Violeta',
+  BLACK: 'Negro',
+  ROSE: 'Rosa',
+};
+
+function formatLocalDate(date: Date) {
+  return date.toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
+function getGreeting(date: Date) {
+  const hour = date.getHours();
+  if (hour < 12) return 'Buenos días';
+  if (hour < 20) return 'Buenas tardes';
+  return 'Buenas noches';
+}
 
 export default function TodayPage() {
-  const [today] = useState(new Date());
+  const [today] = useState(() => new Date());
   const [office, setOffice] = useState<LaudsOffice | null>(null);
-  const [fontSize, setFontSize] = useState<number>(16);
-  const [showRubrics, setShowRubrics] = useState<boolean>(true);
-  const [readingMode, setReadingMode] = useState<boolean>(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [savedStep, setSavedStep] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-
-    (async () => {
-      const built = await buildLaudsOfficeFromOfficialSource(today);
-      if (!cancelled) {
-        setOffice(built);
-      }
-    })();
-
+    buildLaudsOfficeFromOfficialSource(today)
+      .then(result => {
+        if (!cancelled) setOffice(result);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadFailed(true);
+      });
     return () => {
       cancelled = true;
     };
   }, [today]);
 
-  const validation = useMemo(() => office ? validateOffice(office) : null, [office]);
+  useEffect(() => {
+    const date = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0'),
+    ].join('-');
+    try {
+      const raw = localStorage.getItem(`laudia-pray-progress-${date}`);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { stepIndex?: number };
+        if (typeof parsed.stepIndex === 'number' && parsed.stepIndex > 0) setSavedStep(parsed.stepIndex);
+      }
+    } catch {
+      // El progreso es una mejora opcional; la portada sigue funcionando sin él.
+    }
+  }, [today]);
 
-  if (!office) {
+  if (!office && !loadFailed) {
     return (
-      <div className="min-h-screen flex items-center justify-center laudia-gradient">
-        <div className="text-center animate-pulse-soft">
-          <div className="inline-block h-10 w-10 rounded-full border-2 border-stone-300 border-t-stone-600 animate-spin mb-4" />
-          <p className="text-sm text-stone-500">Cargando Laudes de hoy…</p>
+      <div className="laudia-page flex items-center justify-center">
+        <div className="laudia-loading" role="status">
+          <span className="laudia-loading-mark" />
+          <span>Preparando Laudes…</span>
         </div>
       </div>
     );
   }
 
-  const increaseFontSize = () => setFontSize(Math.min(24, fontSize + 2));
-  const decreaseFontSize = () => setFontSize(Math.max(12, fontSize - 2));
-  const effectiveShowRubrics = readingMode ? false : showRubrics;
+  if (!office) {
+    return (
+      <div className="laudia-page">
+        <div className="laudia-page-inner max-w-xl">
+          <div className="laudia-empty-state">
+            <span className="laudia-brand-mark large" aria-hidden="true"><span /></span>
+            <h1 className="laudia-display">No hemos podido preparar el oficio.</h1>
+            <p>Comprueba la conexión y vuelve a intentarlo.</p>
+            <button type="button" onClick={() => window.location.reload()} className="laudia-action-primary">
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const prayerHref = `/laudia/pray?date=${office.day.date}`;
+  const season = seasonLabels[office.day.season] ?? office.day.season;
+  const sections = office.sections.length;
 
   return (
-    <div className="min-h-screen laudia-gradient">
-      <div className="max-w-3xl mx-auto px-4 py-6 md:py-10">
-        {/* Header */}
-        <TodayHeader office={office} />
+    <div className="laudia-page">
+      <div className="laudia-page-inner max-w-3xl">
+        <header className="mb-6">
+          <p className="laudia-kicker">{getGreeting(today)}</p>
+          <h1 className="laudia-display mt-2">Un momento de calma para empezar el día.</h1>
+          <time className="block mt-3 text-sm text-stone-500 capitalize">{formatLocalDate(today)}</time>
+        </header>
 
-        {/* Controls bar */}
-        <div className="laudia-card mt-4 mb-6 p-3.5 md:p-4 flex flex-wrap items-center gap-3">
-          <FontSizeControls
-            fontSize={fontSize}
-            onIncrease={increaseFontSize}
-            onDecrease={decreaseFontSize}
-          />
-          <label className="flex items-center gap-2 cursor-pointer select-none rounded-full border border-stone-200/70 bg-white/55 px-3 py-1.5">
-            <input
-              type="checkbox"
-              checked={showRubrics}
-              onChange={(e) => setShowRubrics(e.target.checked)}
-              className="h-4 w-4 rounded border-stone-300 text-stone-700"
-            />
-            <span className="text-xs font-medium text-stone-600">Rúbricas</span>
-          </label>
-          <ReadingModeToggle
-            readingMode={readingMode}
-            onToggle={() => setReadingMode(!readingMode)}
-          />
-          <Link
-            to={`/laudia/evangelio?date=${office.day.date}`}
-            className="laudia-btn-secondary !py-2 !px-3 text-xs"
-          >
-            Ver Evangelio del día
+        <section className={`laudia-today-hero color-${office.day.color.toLowerCase()}`}>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.13em] text-stone-600">
+              <span className="laudia-liturgical-dot" />
+              {season}
+            </div>
+            <h2 className="mt-5 text-[clamp(1.9rem,8vw,3.25rem)] leading-[1.02] tracking-[-0.045em] text-stone-950 font-semibold max-w-xl">
+              {office.day.title}
+            </h2>
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-stone-600">
+              <span>Semana {office.day.psalterWeek} del Salterio</span>
+              <span>{colorNames[office.day.color] ?? office.day.color}</span>
+              <span>≈ 12 min</span>
+            </div>
+
+            <Link to={prayerHref} className="laudia-action-primary mt-7 w-full sm:w-auto">
+              <span>{savedStep ? 'Continuar Laudes' : 'Comenzar Laudes'}</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+            {savedStep && (
+              <p className="mt-3 text-xs text-stone-500">Tu progreso de hoy está guardado en este dispositivo.</p>
+            )}
+          </div>
+          <div className="laudia-sun-orbit" aria-hidden="true"><span /></div>
+        </section>
+
+        <div className="grid gap-3 mt-4 sm:grid-cols-2">
+          <Link to={`/laudia/evangelio?date=${office.day.date}`} className="laudia-quick-card">
+            <span className="laudia-quick-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H12v18H7.5A2.5 2.5 0 0 0 5 22V4.5Zm14 0A2.5 2.5 0 0 0 16.5 2H12v18h4.5a2.5 2.5 0 0 1 2.5 2V4.5Z" strokeWidth="1.5" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span>
+              <span className="laudia-kicker text-[10px]">Palabra del día</span>
+              <strong className="block mt-1 text-stone-900">Leer el Evangelio</strong>
+            </span>
+            <span className="ml-auto text-stone-300" aria-hidden="true">→</span>
+          </Link>
+
+          <Link to="/laudia/calendar" className="laudia-quick-card">
+            <span className="laudia-quick-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M7 3v3m10-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span>
+              <span className="laudia-kicker text-[10px]">Próximos días</span>
+              <strong className="block mt-1 text-stone-900">Ver calendario</strong>
+            </span>
+            <span className="ml-auto text-stone-300" aria-hidden="true">→</span>
           </Link>
         </div>
 
-        {/* Verification notice if needed */}
-        {!office.isFullyVerified && (
-          <div className="mb-6 reading-hide">
-            <VerificationNotice office={office} />
-          </div>
-        )}
-
-        {validation && <LiturgicalValidatorPanel result={validation} />}
-
-        {/* Prayer sections */}
-        <div
-          className={`laudia-prayer laudia-prose space-y-6 ${
-            fontSize <= 14 ? 'text-sm' : fontSize <= 18 ? 'text-base' : fontSize <= 22 ? 'text-lg' : 'text-xl'
-          } ${readingMode ? 'reading-mode' : ''}`}
-        >
-          {office.sections.map((section: PrayerSection, si: number) => (
-            <section
-              key={section.id}
-              className={`laudia-card p-5 md:p-6 ${si === 0 ? '' : 'animate-fade-in'}`}
-              style={si > 0 ? { animationDelay: `${si * 60}ms` } : undefined}
-            >
-              <h2 className="laudia-h2 mb-4">{section.title}</h2>
-              <div className="laudia-flow">
-                {section.blocks.map((block: PrayerBlock, bi: number) => (
-                  <div
-                    key={block.id}
-                    className={`laudia-block ${bi > 0 ? '' : ''}`}
-                  >
-                    {/* Rubric */}
-                    {effectiveShowRubrics && block.rubrics && (
-                      <p className="rubric mb-2"><span className="laudia-rubric-chip">{block.rubrics}</span></p>
-                    )}
-
-                    {/* Block label */}
-                    {block.type !== 'TEXT' && (
-                      <p className="text-[11px] font-medium text-stone-500 uppercase tracking-wider mb-2">
-                        <span className="laudia-block-label">
-                        {block.type === 'ANTIPHON' && 'Antífona'}
-                        {block.type === 'PSALM' && (block.psalmInfo
-                          ? `Salmo ${block.psalmInfo.number}${block.psalmInfo.verses ? ` (${block.psalmInfo.verses})` : ''}`
-                          : 'Salmo')}
-                        {block.type === 'CANTICLE_OT' && 'Cántico del Antiguo Testamento'}
-                        {block.type === 'CANTICLE_GOSPEL' && (block.canticleInfo?.name ?? 'Cántico evangélico')}
-                        {block.type === 'GLORIA' && 'Gloria al Padre'}
-                        {block.type === 'INVITATORY' && 'Invitatorio'}
-                        {block.type === 'HYMN' && 'Himno'}
-                        {block.type === 'READING' && 'Lectura breve'}
-                        {block.type === 'RESPONSORY' && 'Responsorio breve'}
-                        {block.type === 'INTERCESSIONS' && 'Preces'}
-                        {block.type === 'OUR_FATHER' && 'Oración del Señor'}
-                        {block.type === 'CONCLUDING_PRAYER' && 'Oración final'}
-                        {block.type === 'CONCLUSION' && 'Conclusión'}
-                        </span>
-                      </p>
-                    )}
-
-                    {/* Official text */}
-                    <p className={`whitespace-pre-line leading-relaxed text-stone-800 ${block.type === 'ANTIPHON' ? 'laudia-block-quiet italic border-l-2 border-amber-300/70 pl-3' : ''}`}>
-                      {block.officialText}
-                    </p>
-
-                    {/* AI reflection placeholder (future) */}
-                    {false && block.aiReflection && (
-                      <div className="mt-3 p-3 bg-blue-50/60 border-l-2 border-blue-300 rounded-r-lg">
-                        <p className="text-sm text-blue-700">{block.aiReflection.content}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 text-center text-xs text-stone-500">
-          <p>A+ / A− para cambiar tamaño · Ocultar rúbricas en modo lectura</p>
+        <div className="laudia-quiet-note mt-5">
+          <span className={`laudia-status-dot ${office.isFullyVerified ? 'verified' : ''}`} />
+          <span>
+            {sections} partes preparadas
+            {office.isFullyVerified ? ' · textos verificados' : ' · fuente litúrgica pendiente de cotejo editorial'}
+          </span>
         </div>
       </div>
     </div>

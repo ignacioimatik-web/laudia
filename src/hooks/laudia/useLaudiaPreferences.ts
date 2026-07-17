@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const STORAGE_KEY = 'laudia-preferences';
+const CHANGE_EVENT = 'laudia-preferences-change';
 
 export type VisualMode = 'light' | 'dark' | 'dawn';
 export type DefaultMode = 'guide' | 'expert';
@@ -48,6 +49,13 @@ export function useLaudiaPreferences() {
       // corrupted data – ignore
     }
     setLoaded(true);
+
+    const syncPreferences = (event: Event) => {
+      const customEvent = event as CustomEvent<LaudiaPreferences>;
+      if (customEvent.detail) setPreferences(customEvent.detail);
+    };
+    window.addEventListener(CHANGE_EVENT, syncPreferences);
+    return () => window.removeEventListener(CHANGE_EVENT, syncPreferences);
   }, []);
 
   // Persist a single preference key
@@ -60,6 +68,11 @@ export function useLaudiaPreferences() {
         } catch {
           // quota exceeded or private mode – silently ignore
         }
+        // El updater de React debe ser puro. Sincronizamos las demás
+        // instancias del hook después de terminar el ciclo de render.
+        queueMicrotask(() => {
+          window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: next }));
+        });
         return next;
       });
     },
@@ -74,6 +87,7 @@ export function useLaudiaPreferences() {
     } catch {
       // ignore
     }
+    window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: DEFAULTS }));
   }, []);
 
   return { preferences, updatePreference, resetPreferences, loaded };

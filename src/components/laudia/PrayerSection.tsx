@@ -1,8 +1,8 @@
-import { PrayerSection } from '@/types/laudia';
+import type { PrayerSection as PrayerSectionData } from '@/types/laudia';
 import PrayerBlock from './PrayerBlock';
 
 type PrayerSectionProps = {
-  section: PrayerSection;
+  section: PrayerSectionData;
   showRubrics: boolean;
   readingMode: boolean;
   textSizeClass: string;

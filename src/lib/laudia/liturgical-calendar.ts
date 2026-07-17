@@ -4,6 +4,7 @@ import {
   LiturgicalColor,
   LiturgicalRank,
   PsalterWeek,
+  CalendarDay,
 } from '@/types/laudia';
 
 /**

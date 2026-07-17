@@ -452,3 +452,414 @@ html.dark .laudia-btn-secondary {
 @media (min-width: 1024px) {
   body { font-size: calc(var(--laudia-font-size) * 1.0625); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LaudIA 2 — mobile-first application shell
+   ═══════════════════════════════════════════════════════════════════════ */
+
+html {
+  background: #f2efe8;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+button,
+a,
+input,
+select {
+  font-family: var(--laudia-font-sans);
+}
+
+.laudia-app-shell {
+  background:
+    radial-gradient(circle at 92% 4%, rgba(240, 203, 126, 0.18), transparent 30rem),
+    linear-gradient(180deg, #f8f6f1 0%, #f1eee7 100%);
+  color: #292521;
+}
+
+.laudia-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding-top: env(safe-area-inset-top, 0px);
+  border-bottom: 1px solid rgba(85, 72, 61, 0.09);
+  background: rgba(248, 246, 241, 0.86);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+}
+
+.laudia-brand-mark {
+  position: relative;
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: #d99a31;
+  box-shadow: 0 5px 16px rgba(183, 116, 28, 0.22);
+}
+
+.laudia-brand-mark::before,
+.laudia-brand-mark::after,
+.laudia-brand-mark > span::before,
+.laudia-brand-mark > span::after {
+  position: absolute;
+  content: '';
+  background: #fff9eb;
+  border-radius: 999px;
+}
+
+.laudia-brand-mark::before { width: 10px; height: 1.5px; }
+.laudia-brand-mark::after { width: 1.5px; height: 10px; }
+.laudia-brand-mark > span::before { width: 5px; height: 1px; transform: rotate(45deg); }
+.laudia-brand-mark > span::after { width: 5px; height: 1px; transform: rotate(-45deg); }
+.laudia-brand-mark.large { width: 38px; height: 38px; }
+
+.laudia-desktop-link {
+  border-radius: 999px;
+  padding: 0.55rem 0.95rem;
+  color: #736a63;
+  font: 600 0.76rem/1 var(--laudia-font-sans);
+  transition: 180ms ease;
+}
+
+.laudia-desktop-link:hover {
+  color: #292521;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.laudia-desktop-link.is-active {
+  color: #fff;
+  background: #302a25;
+  box-shadow: 0 8px 20px rgba(47, 40, 35, 0.16);
+}
+
+.laudia-tabbar {
+  position: fixed;
+  z-index: 45;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0.4rem 0.65rem max(0.45rem, env(safe-area-inset-bottom, 0.45rem));
+  border-top: 1px solid rgba(85, 72, 61, 0.12);
+  background: rgba(251, 250, 247, 0.91);
+  box-shadow: 0 -14px 35px rgba(70, 57, 47, 0.06);
+  backdrop-filter: blur(24px) saturate(1.35);
+  -webkit-backdrop-filter: blur(24px) saturate(1.35);
+}
+
+.laudia-tab {
+  position: relative;
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  border-radius: 15px;
+  color: #8c827b;
+  font: 600 0.63rem/1 var(--laudia-font-sans);
+  letter-spacing: 0.01em;
+  transition: 180ms ease;
+}
+
+.laudia-tab::before {
+  position: absolute;
+  top: -0.4rem;
+  width: 20px;
+  height: 2px;
+  content: '';
+  border-radius: 999px;
+  background: transparent;
+}
+
+.laudia-tab.is-active {
+  color: #2e2924;
+  background: rgba(231, 221, 204, 0.5);
+}
+
+.laudia-tab.is-active::before {
+  background: #bd7925;
+}
+
+.laudia-page {
+  min-height: calc(100vh - 56px);
+  padding: 1.55rem 1rem calc(6.4rem + env(safe-area-inset-bottom, 0px));
+}
+
+.laudia-page-inner {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.laudia-kicker {
+  color: #8d7763;
+  font: 700 0.68rem/1.2 var(--laudia-font-sans);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.laudia-display {
+  max-width: 15ch;
+  color: #292521;
+  font-family: var(--laudia-font-serif);
+  font-size: clamp(2rem, 8.5vw, 3.6rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.laudia-lead {
+  max-width: 37rem;
+  color: #746b64;
+  font-family: var(--laudia-font-serif);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.laudia-today-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 365px;
+  padding: clamp(1.4rem, 6vw, 2.4rem);
+  border: 1px solid rgba(117, 97, 78, 0.16);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.84), rgba(255,255,255,0.48)),
+    #e8ede2;
+  box-shadow: 0 22px 60px rgba(83, 67, 53, 0.11);
+}
+
+.laudia-today-hero.color-violet { background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(255,255,255,.5)), #e8e0ef; }
+.laudia-today-hero.color-white { background: linear-gradient(145deg, rgba(255,255,255,.9), rgba(255,255,255,.5)), #ebe8df; }
+.laudia-today-hero.color-red { background: linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.52)), #efe1dc; }
+.laudia-today-hero.color-rose { background: linear-gradient(145deg, rgba(255,255,255,.88), rgba(255,255,255,.52)), #f1dfe3; }
+.laudia-today-hero.color-black { background: linear-gradient(145deg, rgba(255,255,255,.89), rgba(255,255,255,.62)), #d9d5d1; }
+
+.laudia-liturgical-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4e9a6f;
+  box-shadow: 0 0 0 5px rgba(78, 154, 111, 0.12);
+}
+
+.color-violet .laudia-liturgical-dot { background: #8057a4; box-shadow: 0 0 0 5px rgba(128,87,164,.12); }
+.color-red .laudia-liturgical-dot { background: #bd5a49; box-shadow: 0 0 0 5px rgba(189,90,73,.12); }
+.color-rose .laudia-liturgical-dot { background: #c36c82; box-shadow: 0 0 0 5px rgba(195,108,130,.12); }
+.color-white .laudia-liturgical-dot { background: #c2a55b; box-shadow: 0 0 0 5px rgba(194,165,91,.12); }
+.color-black .laudia-liturgical-dot { background: #49433e; box-shadow: 0 0 0 5px rgba(73,67,62,.12); }
+
+.laudia-action-primary {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.9rem 1.15rem;
+  border: 0;
+  border-radius: 16px;
+  color: #fff;
+  background: #302a25;
+  box-shadow: 0 14px 28px rgba(47, 40, 35, 0.2);
+  font: 650 0.88rem/1 var(--laudia-font-sans);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.laudia-action-primary:active {
+  transform: scale(0.985);
+  box-shadow: 0 8px 20px rgba(47, 40, 35, 0.17);
+}
+
+.laudia-sun-orbit {
+  position: absolute;
+  right: -78px;
+  bottom: -108px;
+  width: 250px;
+  height: 250px;
+  border: 1px solid rgba(166, 116, 44, 0.15);
+  border-radius: 50%;
+}
+
+.laudia-sun-orbit::before,
+.laudia-sun-orbit::after {
+  position: absolute;
+  inset: 28px;
+  content: '';
+  border: 1px solid rgba(166, 116, 44, 0.11);
+  border-radius: inherit;
+}
+
+.laudia-sun-orbit::after { inset: 65px; }
+
+.laudia-sun-orbit > span {
+  position: absolute;
+  inset: 94px;
+  border-radius: 50%;
+  background: #d99a31;
+  box-shadow: 0 0 50px rgba(217, 154, 49, 0.35);
+}
+
+.laudia-quick-card,
+.laudia-destination-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 82px;
+  padding: 1rem;
+  border: 1px solid rgba(105, 88, 71, 0.12);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 10px 28px rgba(72, 58, 47, 0.055);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.laudia-quick-card:hover,
+.laudia-destination-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(105, 88, 71, 0.22);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.laudia-quick-icon,
+.laudia-destination-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  place-items: center;
+  border-radius: 14px;
+  color: #4e745c;
+  background: #e5eee7;
+}
+
+.laudia-quick-icon svg,
+.laudia-destination-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.laudia-destination-card {
+  min-height: 132px;
+  align-items: flex-start;
+  padding: 1.15rem;
+}
+
+.laudia-destination-icon.tone-violet { color: #74578f; background: #eee7f3; }
+.laudia-destination-icon.tone-amber { color: #a66a21; background: #f5ead8; }
+.laudia-destination-icon.tone-stone { color: #655c55; background: #ece9e5; }
+
+.laudia-quiet-note {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-inline: 0.25rem;
+  color: #7c746d;
+  font: 500 0.72rem/1.45 var(--laudia-font-sans);
+}
+
+.laudia-status-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #d29944;
+  box-shadow: 0 0 0 4px rgba(210, 153, 68, 0.13);
+}
+
+.laudia-status-dot.verified {
+  background: #5d9d72;
+  box-shadow: 0 0 0 4px rgba(93, 157, 114, 0.13);
+}
+
+.laudia-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #766d66;
+  font: 600 0.82rem/1 var(--laudia-font-sans);
+}
+
+.laudia-loading-mark {
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(189, 121, 37, 0.22);
+  border-top-color: #bd7925;
+  border-radius: 50%;
+  animation: laudia-spin 800ms linear infinite;
+}
+
+@keyframes laudia-spin { to { transform: rotate(360deg); } }
+
+.laudia-empty-state {
+  display: flex;
+  min-height: 55vh;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.laudia-empty-state p {
+  max-width: 30rem;
+  color: #746b64;
+}
+
+html.dark .laudia-app-shell {
+  background:
+    radial-gradient(circle at 92% 4%, rgba(175, 120, 46, 0.12), transparent 28rem),
+    linear-gradient(180deg, #25211e 0%, #1d1a18 100%);
+}
+
+html.dark .laudia-topbar,
+html.dark .laudia-tabbar {
+  border-color: rgba(255,255,255,.08);
+  background: rgba(35, 31, 28, 0.9);
+}
+
+html.dark .laudia-display,
+html.dark .laudia-destination-card strong,
+html.dark .laudia-quick-card strong {
+  color: #f3eee7;
+}
+
+html.dark .laudia-today-hero,
+html.dark .laudia-quick-card,
+html.dark .laudia-destination-card {
+  border-color: rgba(255,255,255,.1);
+  background: rgba(51, 45, 41, .88);
+}
+
+html.dark .laudia-tab.is-active { color: #f4ede5; background: rgba(255,255,255,.08); }
+
+@media (min-width: 640px) {
+  .laudia-page {
+    padding: 2.5rem 1.5rem 5rem;
+  }
+
+  .laudia-today-hero {
+    min-height: 390px;
+  }
+}
+
+@media (max-width: 767px) {
+  .laudia-app-shell main > .laudia-gradient {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
